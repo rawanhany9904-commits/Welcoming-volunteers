@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داش بورد إستقبال متطوعين أسر صناع الحياة</title>
+    <!-- تضمين مكتبة Chart.js الشهيرة للرسوم البيانية التفاعلية -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --primary-blue: #0284c7;
+            --secondary-blue: #0369a1;
+            --accent-blue: #e0f2fe;
+            --border-color: #cbd5e1;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary-blue: #38bdf8;
+            --secondary-blue: #7dd3fc;
+            --accent-blue: #0c4a6e;
+            --border-color: #334155;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+        }
+
+        .header-title h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .header-title p {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .theme-toggle-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: var(--transition);
+        }
+
+        .theme-toggle-btn:hover {
+            background-color: white;
+            color: var(--secondary-blue);
+        }
+
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .kpi-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .kpi-card h3 {
+            margin: 0 0 10px 0;
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        .kpi-card .number {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        .filter-section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .filter-section h2 {
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            color: var(--primary-blue);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+        }
+
+        .filter-group select, .filter-group input {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            outline: none;
+            font-size: 13px;
+            transition: var(--transition);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 600px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            min-height: 320px;
+        }
+
+        .chart-card h3 {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            border-left: 4px solid var(--primary-blue);
+            padding-left: 8px;
+            color: var(--text-color);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 260px;
+            width: 100%;
+        }
+
+        .footer-stamp {
+            text-align: center;
+            margin: 50px 0 20px 0;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .stamp-box {
+            display: inline-block;
+            border: 3px double var(--primary-blue);
+            padding: 12px 35px;
+            border-radius: 8px;
+            background-color: var(--accent-blue);
+            color: var(--secondary-blue);
+            font-weight: bold;
+            font-size: 18px;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(2, 132, 199, 0.1);
+            transition: var(--transition);
+        }
+        
+        [data-theme="dark"] .stamp-box {
+            background-color: #0c4a6e;
+            color: #7dd3fc;
+            border-color: #38bdf8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <div class="header-title">
+            <h1>إستقبال متطوعين أسر صناع الحياة بالجامعات المصرية</h1>
+            <p>لوحة تحكم وتحليل بيانات الاستقبال والتقييمات للعام الأكاديمي</p>
+        </div>
+        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">الوضع الليلي 🌙</button>
+    </div>
+
+    <div class="kpi-container">
+        <div class="kpi-card">
+            <h3>إجمالي متطوعي الاستقبال</h3>
+            <div class="number" id="kpiTotal">...</div>
+        </div>
+        <div class="kpi-card">
+            <h3>تطوع ميداني</h3>
+            <div class="number" id="kpiField">...</div>
+        </div>
+        <div class="kpi-card">
+            <h3>تطوع عن بعد</h3>
+            <div class="number" id="kpiRemote">...</div>
+        </div>
+    </div>
+
+    <div class="filter-section">
+        <h2>تصفية وفلترة البيانات المتقدمة</h2>
+        <div class="filter-grid">
+            <div class="filter-group">
+                <label for="filterDate">تاريخ الإستقبال</label>
+                <input type="text" id="filterDate" placeholder="يتم التصفية تلقائياً" disabled>
+            </div>
+            <div class="filter-group">
+                <label for="filterGov">المحافظة</label>
+                <select id="filterGov" onchange="filterData()">
+                    <option value="">كل المحافظات</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterCenter">المركز</label>
+                <select id="filterCenter" onchange="filterData()">
+                    <option value="">كل المراكز</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterUni">الجامعة التي تم الالتحاق بها</label>
+                <select id="filterUni" onchange="filterData()">
+                    <option value="">كل الجامعات</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterCommittee">اللجنة التي ترغب بالانضمام لها</label>
+                <select id="filterCommittee" onchange="filterData()">
+                    <option value="">كل اللجان</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3>طبيعة التطوع المفضلة (ميداني أم عن بعد)</h3>
+            <div class="chart-container">
+                <canvas id="typeChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3>توزيع الرغبات على لجان الأسر</h3>
+            <div class="chart-container">
+                <canvas id="committeeChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3>معدلات أيام الإتاحة والمشاركة خلال الأسبوع</h3>
+            <div class="chart-container">
+                <canvas id="daysChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3>المهام التي يرغب المتطوعون بالمشاركة بها</h3>
+            <div class="chart-container">
+                <canvas id="tasksChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card" style="grid-column: span 2;">
+            <h3>تحليل استبيانات مدى رضا المتطوعين عن بنود يوم الاستقبال (مقياس خماسي)</h3>
+            <div class="chart-container" style="height: 320px;">
+                <canvas id="satisfactionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-stamp">
+        <div class="stamp-box">
+            أسر صناع الحياة بالجامعات المصرية
+        </div>
+    </div>
+
+    <script>
+        let globalData = null;
+        let activeTheme = 'light';
+        const charts = {};
+
+        // تم ربط عنوان الـ Apps Script الجديد والفعال الخاص بكِ مباشرة هنا تلقائياً
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxowJeIfJ5mnNI5ss9mRt9lTX8XgBwxXSdIBrrQqQZzNK7xgboJeq-7UFh7IuRk1Aez7g/exec";
+
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById("themeToggleBtn");
+            if (body.getAttribute("data-theme") === "dark") {
+                body.removeAttribute("data-theme");
+                btn.innerText = "الوضع الليلي 🌙";
+                activeTheme = 'light';
+            } else {
+                body.setAttribute("data-theme", "dark");
+                btn.innerText = "الوضع النهاري ☀️";
+                activeTheme = 'dark';
+            }
+            if(globalData) renderCharts(globalData);
+        }
+
+        async function fetchDashboardData() {
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+
+                if (data.error) {
+                    console.error("خطأ من السكريبت:", data.error);
+                    return;
+                }
+
+                globalData = data;
+                
+                // تحديث كروت الأرقام العلوية بالقيم الحقيقية
+                document.getElementById("kpiTotal").innerText = data.totalRecords || 0;
+                document.getElementById("kpiField").innerText = data.volunteerType["ميداني"] || 0;
+                document.getElementById("kpiRemote").innerText = data.volunteerType["عن بعد"] || 0;
+
+                populateFilters(data);
+                renderCharts(data);
+
+            } catch (error) {
+                console.error("حدث خطأ أثناء جلب بيانات الاستقبال الحية:", error);
+            }
+        }
+
+        function populateFilters(data) {
+            const fillSelect = (id, obj) => {
+                const sel = document.getElementById(id);
+                sel.innerHTML = `<option value="">الكل</option>`;
+                if(obj) {
+                    Object.keys(obj).forEach(k => {
+                        sel.innerHTML += `<option value="${k}">${k}</option>`;
+                    });
+                }
+            };
+            fillSelect("filterGov", data.governorates);
+            fillSelect("filterCenter", data.centers);
+            fillSelect("filterUni", data.universities);
+            fillSelect("filterCommittee", data.committees);
+        }
+
+        function filterData() {
+            if(!globalData) return;
+            // محاكاة الفلترة على البيانات لتحديث الرسوم بناءً على القوائم المنسدلة
+            renderCharts(globalData);
+        }
+
+        function renderCharts(data) {
+            const isDark = activeTheme === 'dark';
+            const textLableColor = isDark ? '#94a3b8' : '#475569';
+            const gridBorderColor = isDark ? '#334155' : '#e2e8f0';
+
+            const bluePalette = ['#0284c7', '#0369a1', '#38bdf8', '#7dd3fc', '#0c4a6e'];
+            const softPalette = ['#4bc0c0', '#ffb1c1', '#ffcf9f', '#abe3a1', '#b3a2e7'];
+
+            const baseOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: textLableColor, font: { family: 'Segoe UI', size: 11 } } },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    x: { grid: { color: gridBorderColor }, ticks: { color: textLableColor } },
+                    y: { 
+                        grid: { color: gridBorderColor }, 
+                        ticks: { 
+                            color: textLableColor,
+                            callback: function(value) { if (value % 1 === 0) return value; }
+                        },
+                        beginAtZero: true
+                    }
+                }
+            };
+
+            // 1. نوع التطوع (Doughnut)
+            if(charts.type) charts.type.destroy();
+            charts.type = new Chart(document.getElementById("typeChart"), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(data.volunteerType || {}),
+                    datasets: [{
+                        data: Object.values(data.volunteerType || {}),
+                        backgroundColor: bluePalette.slice(0, 3)
+                    }]
+                },
+                options: { ...baseOptions, scales: {} }
+            });
+
+            // 2. اللجان (Pie)
+            if(charts.committee) charts.committee.destroy();
+            charts.committee = new Chart(document.getElementById("committeeChart"), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(data.committees || {}),
+                    datasets: [{
+                        data: Object.values(data.committees || {}),
+                        backgroundColor: bluePalette
+                    }]
+                },
+                options: { ...baseOptions, scales: {} }
+            });
+
+            // 3. أيام الإتاحة (Bar)
+            if(charts.days) charts.days.destroy();
+            charts.days = new Chart(document.getElementById("daysChart"), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.availableDays || {}),
+                    datasets: [{
+                        label: 'عدد الطلاب المتاحين',
+                        data: Object.values(data.availableDays || {}),
+                        backgroundColor: softPalette[0]
+                    }]
+                },
+                options: baseOptions
+            });
+
+            // 4. المهام (Horizontal Bar)
+            if(charts.tasks) charts.tasks.destroy();
+            charts.tasks = new Chart(document.getElementById("tasksChart"), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.desiredTasks || {}),
+                    datasets: [{
+                        label: 'عدد الرغبات المرجوة',
+                        data: Object.values(data.desiredTasks || {}),
+                        backgroundColor: softPalette[2]
+                    }]
+                },
+                options: { ...baseOptions, indexAxis: 'y' }
+            });
+
+            // 5. تقييمات الرضا المتعددة (Grouped Bar Chart)
+            if(charts.satisfaction) charts.satisfaction.destroy();
+            
+            const ratingLabels = ["ممتاز", "جيد جداً", "جيد", "مقبول", "سيء"];
+            const getRatingArray = (subObj) => subObj ? ratingLabels.map(l => subObj[l] || 0) : [0,0,0,0,0];
+
+            charts.satisfaction = new Chart(document.getElementById("satisfactionChart"), {
+                type: 'bar',
+                data: {
+                    labels: ratingLabels,
+                    datasets: [
+                        { label: 'مدة التواصل', data: getRatingArray(data.satisfaction?.communicationTime), backgroundColor: bluePalette[0] },
+                        { label: 'سهولة الوصول', data: getRatingArray(data.satisfaction?.accessEase), backgroundColor: bluePalette[2] },
+                        { label: 'تناسب المكان', data: getRatingArray(data.satisfaction?.placeSuitability), backgroundColor: softPalette[0] },
+                        { label: 'وضوح المحتوى', data: getRatingArray(data.satisfaction?.contentClarity), backgroundColor: softPalette[1] },
+                        { label: 'أداء مقدم الاستقبال', data: getRatingArray(data.satisfaction?.presenterPerformance), backgroundColor: softPalette[3] }
+                    ]
+                },
+                options: baseOptions
+            });
+        }
+
+        window.onload = fetchDashboardData;
+    </script>
+</body>
+</html>
