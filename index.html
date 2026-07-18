@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>داش بورد إستقبال متطوعين أسر صناع الحياة</title>
-    <!-- تضمين مكتبة Chart.js الشهيرة للرسوم البيانية التفاعلية -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -16,8 +15,9 @@
             --secondary-blue: #0369a1;
             --accent-blue: #e0f2fe;
             --border-color: #cbd5e1;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
             --transition: all 0.3s ease;
+            --footer-bg: #10355c;
         }
 
         [data-theme="dark"] {
@@ -30,6 +30,7 @@
             --accent-blue: #0c4a6e;
             --border-color: #334155;
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+            --footer-bg: #0b1e36;
         }
 
         body {
@@ -59,12 +60,6 @@
             font-weight: bold;
         }
 
-        .header-title p {
-            margin: 5px 0 0 0;
-            opacity: 0.9;
-            font-size: 14px;
-        }
-
         .theme-toggle-btn {
             background-color: rgba(255, 255, 255, 0.2);
             border: 2px solid white;
@@ -74,11 +69,6 @@
             cursor: pointer;
             font-weight: bold;
             transition: var(--transition);
-        }
-
-        .theme-toggle-btn:hover {
-            background-color: white;
-            color: var(--secondary-blue);
         }
 
         .kpi-container {
@@ -117,7 +107,6 @@
             padding: 20px;
             margin-bottom: 25px;
             box-shadow: var(--shadow);
-            transition: var(--transition);
         }
 
         .filter-section h2 {
@@ -130,7 +119,7 @@
 
         .filter-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
         }
 
@@ -146,15 +135,13 @@
             color: var(--text-muted);
         }
 
-        .filter-group select, .filter-group input {
+        .filter-group select {
             padding: 10px;
             border-radius: 6px;
             border: 1px solid var(--border-color);
             background-color: var(--bg-color);
             color: var(--text-color);
             outline: none;
-            font-size: 13px;
-            transition: var(--transition);
         }
 
         .charts-grid {
@@ -164,19 +151,12 @@
             margin-bottom: 40px;
         }
 
-        @media (max-width: 600px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
         .chart-card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 20px;
             box-shadow: var(--shadow);
-            transition: var(--transition);
             min-height: 320px;
         }
 
@@ -185,7 +165,6 @@
             font-size: 16px;
             border-left: 4px solid var(--primary-blue);
             padding-left: 8px;
-            color: var(--text-color);
         }
 
         .chart-container {
@@ -194,31 +173,16 @@
             width: 100%;
         }
 
-        .footer-stamp {
-            text-align: center;
-            margin: 50px 0 20px 0;
-            padding-top: 20px;
-            border-top: 1px dashed var(--border-color);
-        }
-
-        .stamp-box {
-            display: inline-block;
-            border: 3px double var(--primary-blue);
-            padding: 12px 35px;
-            border-radius: 8px;
-            background-color: var(--accent-blue);
-            color: var(--secondary-blue);
+        /* تصميم شريط الختم العريض والمطابق تماماً للصورة الثالثة */
+        .footer-full-width {
+            background-color: var(--footer-bg);
+            color: #ffffff;
+            text-align: right;
+            padding: 15px 40px;
+            font-size: 16px;
             font-weight: bold;
-            font-size: 18px;
-            letter-spacing: 1px;
-            box-shadow: 0 0 10px rgba(2, 132, 199, 0.1);
-            transition: var(--transition);
-        }
-        
-        [data-theme="dark"] .stamp-box {
-            background-color: #0c4a6e;
-            color: #7dd3fc;
-            border-color: #38bdf8;
+            margin: 40px -20px -20px -20px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
     </style>
 </head>
@@ -227,7 +191,6 @@
     <div class="header-container">
         <div class="header-title">
             <h1>إستقبال متطوعين أسر صناع الحياة بالجامعات المصرية</h1>
-            <p>لوحة تحكم وتحليل بيانات الاستقبال والتقييمات للعام الأكاديمي</p>
         </div>
         <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">الوضع الليلي 🌙</button>
     </div>
@@ -238,11 +201,11 @@
             <div class="number" id="kpiTotal">...</div>
         </div>
         <div class="kpi-card">
-            <h3>تطوع ميداني</h3>
+            <h3>Offline</h3>
             <div class="number" id="kpiField">...</div>
         </div>
         <div class="kpi-card">
-            <h3>تطوع عن بعد</h3>
+            <h3>Online</h3>
             <div class="number" id="kpiRemote">...</div>
         </div>
     </div>
@@ -250,10 +213,6 @@
     <div class="filter-section">
         <h2>تصفية وفلترة البيانات المتقدمة</h2>
         <div class="filter-grid">
-            <div class="filter-group">
-                <label for="filterDate">تاريخ الإستقبال</label>
-                <input type="text" id="filterDate" placeholder="يتم التصفية تلقائياً" disabled>
-            </div>
             <div class="filter-group">
                 <label for="filterGov">المحافظة</label>
                 <select id="filterGov" onchange="filterData()">
@@ -283,21 +242,21 @@
 
     <div class="charts-grid">
         <div class="chart-card">
-            <h3>طبيعة التطوع المفضلة (ميداني أم عن بعد)</h3>
+            <h3>رغبة التطوع عن بعد ام ميداني</h3>
             <div class="chart-container">
                 <canvas id="typeChart"></canvas>
             </div>
         </div>
 
         <div class="chart-card">
-            <h3>توزيع الرغبات على لجان الأسر</h3>
+            <h3>اللجان المرغوب التطوع بها</h3>
             <div class="chart-container">
                 <canvas id="committeeChart"></canvas>
             </div>
         </div>
 
         <div class="chart-card">
-            <h3>معدلات أيام الإتاحة والمشاركة خلال الأسبوع</h3>
+            <h3>ايام المشاركه و الإتاحه</h3>
             <div class="chart-container">
                 <canvas id="daysChart"></canvas>
             </div>
@@ -318,10 +277,9 @@
         </div>
     </div>
 
-    <div class="footer-stamp">
-        <div class="stamp-box">
-            أسر صناع الحياة بالجامعات المصرية
-        </div>
+    <!-- الختم العريض المتناسق والمطلوب -->
+    <div class="footer-full-width">
+        أسر صناع الحياة بالجامعات المصرية_2026
     </div>
 
     <script>
@@ -329,7 +287,7 @@
         let activeTheme = 'light';
         const charts = {};
 
-        // تم ربط عنوان الـ Apps Script الجديد والفعال الخاص بكِ مباشرة هنا تلقائياً
+        // ضعي رابط الـ web app المحدث هنا 
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxowJeIfJ5mnNI5ss9mRt9lTX8XgBwxXSdIBrrQqQZzNK7xgboJeq-7UFh7IuRk1Aez7g/exec";
 
         function toggleTheme() {
@@ -351,24 +309,18 @@
             try {
                 const response = await fetch(SCRIPT_URL);
                 const data = await response.json();
-
-                if (data.error) {
-                    console.error("خطأ من السكريبت:", data.error);
-                    return;
-                }
+                if (data.error) return;
 
                 globalData = data;
                 
-                // تحديث كروت الأرقام العلوية بالقيم الحقيقية
                 document.getElementById("kpiTotal").innerText = data.totalRecords || 0;
-                document.getElementById("kpiField").innerText = data.volunteerType["ميداني"] || 0;
-                document.getElementById("kpiRemote").innerText = data.volunteerType["عن بعد"] || 0;
+                document.getElementById("kpiField").innerText = data.offlineRecords || 0;
+                document.getElementById("kpiRemote").innerText = data.onlineRecords || 0;
 
                 populateFilters(data);
                 renderCharts(data);
-
             } catch (error) {
-                console.error("حدث خطأ أثناء جلب بيانات الاستقبال الحية:", error);
+                console.error(error);
             }
         }
 
@@ -376,11 +328,7 @@
             const fillSelect = (id, obj) => {
                 const sel = document.getElementById(id);
                 sel.innerHTML = `<option value="">الكل</option>`;
-                if(obj) {
-                    Object.keys(obj).forEach(k => {
-                        sel.innerHTML += `<option value="${k}">${k}</option>`;
-                    });
-                }
+                if(obj) { Object.keys(obj).forEach(k => { sel.innerHTML += `<option value="${k}">${k}</option>`; }); }
             };
             fillSelect("filterGov", data.governorates);
             fillSelect("filterCenter", data.centers);
@@ -390,7 +338,6 @@
 
         function filterData() {
             if(!globalData) return;
-            // محاكاة الفلترة على البيانات لتحديث الرسوم بناءً على القوائم المنسدلة
             renderCharts(globalData);
         }
 
@@ -399,90 +346,73 @@
             const textLableColor = isDark ? '#94a3b8' : '#475569';
             const gridBorderColor = isDark ? '#334155' : '#e2e8f0';
 
-            const bluePalette = ['#0284c7', '#0369a1', '#38bdf8', '#7dd3fc', '#0c4a6e'];
-            const softPalette = ['#4bc0c0', '#ffb1c1', '#ffcf9f', '#abe3a1', '#b3a2e7'];
+            // تدرجات ألوان متناسقة ومختلفة للرسوم البيانية كأعمدة
+            const colorsType = ['#34d399', '#60a5fa'];
+            const colorsCommittees = ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#6366f1'];
+            const colorsDays = '#06b6d4';
+            const colorsTasks = '#f97316';
+            const bluePalette = ['#0284c7', '#38bdf8', '#4bc0c0', '#ffcf9f', '#b3a2e7'];
 
             const baseOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { labels: { color: textLableColor, font: { family: 'Segoe UI', size: 11 } } },
-                    tooltip: { enabled: true }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
-                    x: { grid: { color: gridBorderColor }, ticks: { color: textLableColor } },
-                    y: { 
-                        grid: { color: gridBorderColor }, 
-                        ticks: { 
-                            color: textLableColor,
-                            callback: function(value) { if (value % 1 === 0) return value; }
-                        },
-                        beginAtZero: true
-                    }
+                    x: { grid: { color: gridBorderColor }, ticks: { color: textLableColor, font: { family: 'Segoe UI' } } },
+                    y: { grid: { color: gridBorderColor }, ticks: { color: textLableColor }, beginAtZero: true }
                 }
             };
 
-            // 1. نوع التطوع (Doughnut)
+            // 1. رغبة التطوع عن بعد ام ميداني (أعمدة)
             if(charts.type) charts.type.destroy();
             charts.type = new Chart(document.getElementById("typeChart"), {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(data.volunteerType || {}),
-                    datasets: [{
-                        data: Object.values(data.volunteerType || {}),
-                        backgroundColor: bluePalette.slice(0, 3)
-                    }]
-                },
-                options: { ...baseOptions, scales: {} }
-            });
-
-            // 2. اللجان (Pie)
-            if(charts.committee) charts.committee.destroy();
-            charts.committee = new Chart(document.getElementById("committeeChart"), {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(data.committees || {}),
-                    datasets: [{
-                        data: Object.values(data.committees || {}),
-                        backgroundColor: bluePalette
-                    }]
-                },
-                options: { ...baseOptions, scales: {} }
-            });
-
-            // 3. أيام الإتاحة (Bar)
-            if(charts.days) charts.days.destroy();
-            charts.days = new Chart(document.getElementById("daysChart"), {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(data.availableDays || {}),
-                    datasets: [{
-                        label: 'عدد الطلاب المتاحين',
-                        data: Object.values(data.availableDays || {}),
-                        backgroundColor: softPalette[0]
-                    }]
+                    labels: Object.keys(data.volunteerType || {}),
+                    datasets: [{ data: Object.values(data.volunteerType || {}), backgroundColor: colorsType }]
                 },
                 options: baseOptions
             });
 
-            // 4. المهام (Horizontal Bar)
+            // 2. اللجان المرغوب التطوع بها (أعمدة)
+            if(charts.committee) charts.committee.destroy();
+            charts.committee = new Chart(document.getElementById("committeeChart"), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.committees || {}),
+                    datasets: [{ data: Object.values(data.committees || {}), backgroundColor: colorsCommittees }]
+                },
+                options: baseOptions
+            });
+
+            // 3. ايام المشاركه و الإتاحه (أعمدة مرتبة عربياً)
+            if(charts.days) charts.days.destroy();
+            const order = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
+            const sortedDays = {};
+            order.forEach(day => { if(data.availableDays && data.availableDays[day]) sortedDays[day] = data.availableDays[day]; });
+
+            charts.days = new Chart(document.getElementById("daysChart"), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(sortedDays),
+                    datasets: [{ data: Object.values(sortedDays), backgroundColor: colorsDays }]
+                },
+                options: baseOptions
+            });
+
+            // 4. المهام التي يرغب المتطوعون بالمشاركة بها (أعمدة لكل مهمة على حِده)
             if(charts.tasks) charts.tasks.destroy();
             charts.tasks = new Chart(document.getElementById("tasksChart"), {
                 type: 'bar',
                 data: {
                     labels: Object.keys(data.desiredTasks || {}),
-                    datasets: [{
-                        label: 'عدد الرغبات المرجوة',
-                        data: Object.values(data.desiredTasks || {}),
-                        backgroundColor: softPalette[2]
-                    }]
+                    datasets: [{ data: Object.values(data.desiredTasks || {}), backgroundColor: colorsTasks }]
                 },
-                options: { ...baseOptions, indexAxis: 'y' }
+                options: baseOptions
             });
 
-            // 5. تقييمات الرضا المتعددة (Grouped Bar Chart)
+            // 5. تقييمات الرضا
             if(charts.satisfaction) charts.satisfaction.destroy();
-            
             const ratingLabels = ["ممتاز", "جيد جداً", "جيد", "مقبول", "سيء"];
             const getRatingArray = (subObj) => subObj ? ratingLabels.map(l => subObj[l] || 0) : [0,0,0,0,0];
 
@@ -492,13 +422,13 @@
                     labels: ratingLabels,
                     datasets: [
                         { label: 'مدة التواصل', data: getRatingArray(data.satisfaction?.communicationTime), backgroundColor: bluePalette[0] },
-                        { label: 'سهولة الوصول', data: getRatingArray(data.satisfaction?.accessEase), backgroundColor: bluePalette[2] },
-                        { label: 'تناسب المكان', data: getRatingArray(data.satisfaction?.placeSuitability), backgroundColor: softPalette[0] },
-                        { label: 'وضوح المحتوى', data: getRatingArray(data.satisfaction?.contentClarity), backgroundColor: softPalette[1] },
-                        { label: 'أداء مقدم الاستقبال', data: getRatingArray(data.satisfaction?.presenterPerformance), backgroundColor: softPalette[3] }
+                        { label: 'سهولة الوصول', data: getRatingArray(data.satisfaction?.accessEase), backgroundColor: bluePalette[1] },
+                        { label: 'تناسب المكان', data: getRatingArray(data.satisfaction?.placeSuitability), backgroundColor: bluePalette[2] },
+                        { label: 'وضوح المحتوى', data: getRatingArray(data.satisfaction?.contentClarity), backgroundColor: bluePalette[3] },
+                        { label: 'أداء مقدم الاستقبال', data: getRatingArray(data.satisfaction?.presenterPerformance), backgroundColor: bluePalette[4] }
                     ]
                 },
-                options: baseOptions
+                options: { ...baseOptions, plugins: { legend: { display: true, labels: { color: textLableColor } } } }
             });
         }
 
