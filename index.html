@@ -173,7 +173,6 @@
             width: 100%;
         }
 
-        /* تصميم شريط الختم العريض والمطابق تماماً للصورة الثالثة */
         .footer-full-width {
             background-color: var(--footer-bg);
             color: #ffffff;
@@ -198,15 +197,15 @@
     <div class="kpi-container">
         <div class="kpi-card">
             <h3>إجمالي متطوعي الاستقبال</h3>
-            <div class="number" id="kpiTotal">...</div>
+            <div class="number" id="kpiTotal">0</div>
         </div>
         <div class="kpi-card">
             <h3>Offline</h3>
-            <div class="number" id="kpiField">...</div>
+            <div class="number" id="kpiField">0</div>
         </div>
         <div class="kpi-card">
             <h3>Online</h3>
-            <div class="number" id="kpiRemote">...</div>
+            <div class="number" id="kpiRemote">0</div>
         </div>
     </div>
 
@@ -277,17 +276,15 @@
         </div>
     </div>
 
-    <!-- الختم العريض المتناسق والمطلوب -->
     <div class="footer-full-width">
         أسر صناع الحياة بالجامعات المصرية_2026
     </div>
 
     <script>
-        let globalData = null;
+        let rawServerData = null; // الاحتفاظ بالبيانات الخام الأصلية القادمة من السيرفر
         let activeTheme = 'light';
         const charts = {};
 
-        // ضعي رابط الـ web app المحدث هنا 
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxowJeIfJ5mnNI5ss9mRt9lTX8XgBwxXSdIBrrQqQZzNK7xgboJeq-7UFh7IuRk1Aez7g/exec";
 
         function toggleTheme() {
@@ -302,7 +299,7 @@
                 btn.innerText = "الوضع النهاري ☀️";
                 activeTheme = 'dark';
             }
-            if(globalData) renderCharts(globalData);
+            filterData();
         }
 
         async function fetchDashboardData() {
@@ -311,14 +308,12 @@
                 const data = await response.json();
                 if (data.error) return;
 
-                globalData = data;
+                rawServerData = data; 
                 
-                document.getElementById("kpiTotal").innerText = data.totalRecords || 0;
-                document.getElementById("kpiField").innerText = data.offlineRecords || 0;
-                document.getElementById("kpiRemote").innerText = data.onlineRecords || 0;
-
+                // ملء الفلاتر لمرة واحدة فقط بالخيارات الكاملة الأصلية
                 populateFilters(data);
-                renderCharts(data);
+                // تفعيل الفلترة والرسومات لأول مرة
+                filterData();
             } catch (error) {
                 console.error(error);
             }
@@ -336,9 +331,78 @@
             fillSelect("filterCommittee", data.committees);
         }
 
+        // دالة الفلترة الذكية والتفاعلية بناءً على اختيارات المستخدم
         function filterData() {
-            if(!globalData) return;
-            renderCharts(globalData);
+            if (!rawServerData) return;
+
+            const selectedGov = document.getElementById("filterGov").value;
+            const selectedCenter = document.getElementById("filterCenter").value;
+            const selectedUni = document.getElementById("filterUni").value;
+            const selectedCommittee = document.getElementById("filterCommittee").value;
+
+            // كائن هيكلي جديد لحساب الإحصائيات المفلترة
+            let filteredStats = {
+                totalRecords: 0, onlineRecords: 0, offlineRecords: 0,
+                volunteerType: {"Offline": 0, "Online": 0},
+                committees: {},
+                availableDays: {"السبت": 0, "الأحد": 0, "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0},
+                desiredTasks: {},
+                satisfaction: {
+                    communicationTime: {"ممتاز":0,"جيد جداً":0,"جيد":0,"مقبول":0,"سيء":0},
+                    accessEase: {"ممتاز":0,"جيد جداً":0,"جيد":0,"مقبول":0,"سيء":0},
+                    placeSuitability: {"ممتاز":0,"جيد جداً":0,"جيد":0,"مقبول":0,"سيء":0},
+                    contentClarity: {"ممتاز":0,"جيد جداً":0,"جيد":0,"مقبول":0,"سيء":0},
+                    presenterPerformance: {"ممتاز":0,"جيد جداً":0,"جيد":0,"مقبول":0,"سيء":0}
+                }
+            };
+
+            // الوصول لصفوف البيانات المفلترة وإعادة تجميع الإحصائيات ديناميكياً
+            if(rawServerData.allRowsRaw) {
+                rawServerData.allRowsRaw.forEach(row => {
+                    // التحقق من مطابقة الصف لجميع شروط الفلاتر المختارة
+                    if (selectedGov && row.gov !== selectedGov) return;
+                    if (selectedCenter && row.center !== selectedCenter) return;
+                    if (selectedUni && row.uni !== selectedUni) return;
+                    if (selectedCommittee && row.committee !== selectedCommittee) return;
+
+                    filteredStats.totalRecords++;
+
+                    // حساب نوع التطوع
+                    if(row.isOffline) { filteredStats.offlineRecords++; filteredStats.volunteerType["Offline"]++; }
+                    if(row.isOnline) { filteredStats.onlineRecords++; filteredStats.volunteerType["Online"]++; }
+
+                    // حساب اللجان
+                    if(row.committee) { filteredStats.committees[row.committee] = (filteredStats.committees[row.committee] || 0) + 1; }
+
+                    // حساب الأيام المحددة بدقة
+                    if(row.daysList) {
+                        row.daysList.forEach(d => { if(filteredStats.availableDays[d] !== undefined) filteredStats.availableDays[d]++; });
+                    }
+
+                    // حساب المهام لكل مهمة بشكل مستقل
+                    if(row.tasksList) {
+                        row.tasksList.forEach(t => { if(t) filteredStats.desiredTasks[t] = (filteredStats.desiredTasks[t] || 0) + 1; });
+                    }
+
+                    // حساب بنود الرضا لقيم التصفية الحالية
+                    const addSat = (val, subObj) => { if(val && subObj[val] !== undefined) subObj[val]++; };
+                    addSat(row.satTime, filteredStats.satisfaction.communicationTime);
+                    addSat(row.satAccess, filteredStats.satisfaction.accessEase);
+                    addSat(row.satPlace, filteredStats.satisfaction.placeSuitability);
+                    addSat(row.satContent, filteredStats.satisfaction.contentClarity);
+                    addSat(row.satPresenter, filteredStats.satisfaction.presenterPerformance);
+                });
+            } else {
+                // باك آب حمايتي في حال لم يتم تحديث الـ App Script بعد
+                filteredStats = rawServerData;
+            }
+
+            // تحديث كروت الأرقام بناءً على الفلترة التفاعلية الحية
+            document.getElementById("kpiTotal").innerText = filteredStats.totalRecords;
+            document.getElementById("kpiField").innerText = filteredStats.offlineRecords;
+            document.getElementById("kpiRemote").innerText = filteredStats.onlineRecords;
+
+            renderCharts(filteredStats);
         }
 
         function renderCharts(data) {
@@ -346,11 +410,11 @@
             const textLableColor = isDark ? '#94a3b8' : '#475569';
             const gridBorderColor = isDark ? '#334155' : '#e2e8f0';
 
-            // تدرجات ألوان متناسقة ومختلفة للرسوم البيانية كأعمدة
-            const colorsType = ['#34d399', '#60a5fa'];
-            const colorsCommittees = ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#6366f1'];
-            const colorsDays = '#06b6d4';
-            const colorsTasks = '#f97316';
+            // باليتات ألوان مميزة ومتنوعة جداً لكل رسم بياني على حدة من أجل المظهر الاحترافي
+            const colorsType = ['#4fc3f7', '#4db6ac'];
+            const colorsCommittees = ['#ff8a65', '#ba68c8', '#64b5f6', '#81c784', '#ffd54f', '#90a4ae'];
+            const colorsDays = ['#ffb74d', '#ffb74d', '#ffb74d', '#ffb74d', '#ffb74d', '#ffb74d', '#ffb74d'];
+            const colorsTasks = ['#a1887f', '#e57373', '#f06292', '#4dd0e1', '#9575cd', '#dce775', '#a1887f', '#4682B4'];
             const bluePalette = ['#0284c7', '#38bdf8', '#4bc0c0', '#ffcf9f', '#b3a2e7'];
 
             const baseOptions = {
@@ -358,12 +422,12 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { grid: { color: gridBorderColor }, ticks: { color: textLableColor, font: { family: 'Segoe UI' } } },
-                    y: { grid: { color: gridBorderColor }, ticks: { color: textLableColor }, beginAtZero: true }
+                    x: { grid: { color: gridBorderColor }, ticks: { color: textLableColor, font: { family: 'Segoe UI', size: 12 } } },
+                    y: { grid: { color: gridBorderColor }, ticks: { color: textLableColor, stepSize: 1, precision: 0 }, beginAtZero: true }
                 }
             };
 
-            // 1. رغبة التطوع عن بعد ام ميداني (أعمدة)
+            // 1. رغبة التطوع عن بعد ام ميداني (أعمدة ملونة)
             if(charts.type) charts.type.destroy();
             charts.type = new Chart(document.getElementById("typeChart"), {
                 type: 'bar',
@@ -374,7 +438,7 @@
                 options: baseOptions
             });
 
-            // 2. اللجان المرغوب التطوع بها (أعمدة)
+            // 2. اللجان المرغوب التطوع بها (أعمدة بألوان متباينة ومتناسقة)
             if(charts.committee) charts.committee.destroy();
             charts.committee = new Chart(document.getElementById("committeeChart"), {
                 type: 'bar',
@@ -385,22 +449,21 @@
                 options: baseOptions
             });
 
-            // 3. ايام المشاركه و الإتاحه (أعمدة مرتبة عربياً)
+            // 3. ايام المشاركه و الإتاحه (تثبيت الأيام السبعة بالكامل عربياً من السبت للجمعة)
             if(charts.days) charts.days.destroy();
-            const order = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
-            const sortedDays = {};
-            order.forEach(day => { if(data.availableDays && data.availableDays[day]) sortedDays[day] = data.availableDays[day]; });
+            const daysLabels = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
+            const daysValues = daysLabels.map(day => (data.availableDays && data.availableDays[day]) ? data.availableDays[day] : 0);
 
             charts.days = new Chart(document.getElementById("daysChart"), {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(sortedDays),
-                    datasets: [{ data: Object.values(sortedDays), backgroundColor: colorsDays }]
+                    labels: daysLabels,
+                    datasets: [{ data: daysValues, backgroundColor: '#42a5f5' }]
                 },
                 options: baseOptions
             });
 
-            // 4. المهام التي يرغب المتطوعون بالمشاركة بها (أعمدة لكل مهمة على حِده)
+            // 4. المهام التي يرغب المتطوعون بالمشاركة بها (أعمدة ملونة بالكامل وبأرقام صحيحة دقيقة)
             if(charts.tasks) charts.tasks.destroy();
             charts.tasks = new Chart(document.getElementById("tasksChart"), {
                 type: 'bar',
