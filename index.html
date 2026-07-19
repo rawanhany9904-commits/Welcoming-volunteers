@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>داش بورد إستقبال متطوعين أسر صناع الحياة</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- إضافة إضافة عرض الأرقام فوق الأعمدة مباشرة بشكل احترافي -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
         :root {
             --bg-color: #f0f4f8;
@@ -157,7 +159,7 @@
             border-radius: 12px;
             padding: 20px;
             box-shadow: var(--shadow);
-            min-height: 320px;
+            min-height: 350px;
         }
 
         .chart-card h3 {
@@ -169,7 +171,7 @@
 
         .chart-container {
             position: relative;
-            height: 260px;
+            height: 280px;
             width: 100%;
         }
 
@@ -270,7 +272,7 @@
 
         <div class="chart-card" style="grid-column: span 2;">
             <h3>تحليل استبيانات مدى رضا المتطوعين عن بنود يوم الاستقبال (مقياس خماسي)</h3>
-            <div class="chart-container" style="height: 320px;">
+            <div class="chart-container" style="height: 340px;">
                 <canvas id="satisfactionChart"></canvas>
             </div>
         </div>
@@ -281,7 +283,10 @@
     </div>
 
     <script>
-        let rawServerData = null; // الاحتفاظ بالبيانات الخام الأصلية القادمة من السيرفر
+        // تفعيل إضافة التسميات الرقمية على الأعمدة افتراضياً لجميع الجداول البيانية
+        Chart.register(ChartDataLabels);
+
+        let rawServerData = null; 
         let activeTheme = 'light';
         const charts = {};
 
@@ -309,10 +314,7 @@
                 if (data.error) return;
 
                 rawServerData = data; 
-                
-                // ملء الفلاتر لمرة واحدة فقط بالخيارات الكاملة الأصلية
                 populateFilters(data);
-                // تفعيل الفلترة والرسومات لأول مرة
                 filterData();
             } catch (error) {
                 console.error(error);
@@ -323,7 +325,7 @@
             const fillSelect = (id, obj) => {
                 const sel = document.getElementById(id);
                 sel.innerHTML = `<option value="">الكل</option>`;
-                if(obj) { Object.keys(obj).forEach(k => { sel.innerHTML += `<option value="${k}">${k}</option>`; }); }
+                if(obj) { Object.keys(obj).sort().forEach(k => { sel.innerHTML += `<option value="${k}">${k}</option>`; }); }
             };
             fillSelect("filterGov", data.governorates);
             fillSelect("filterCenter", data.centers);
@@ -331,7 +333,6 @@
             fillSelect("filterCommittee", data.committees);
         }
 
-        // دالة الفلترة الذكية والتفاعلية بناءً على اختيارات المستخدم
         function filterData() {
             if (!rawServerData) return;
 
@@ -340,7 +341,6 @@
             const selectedUni = document.getElementById("filterUni").value;
             const selectedCommittee = document.getElementById("filterCommittee").value;
 
-            // كائن هيكلي جديد لحساب الإحصائيات المفلترة
             let filteredStats = {
                 totalRecords: 0, onlineRecords: 0, offlineRecords: 0,
                 volunteerType: {"Offline": 0, "Online": 0},
@@ -356,10 +356,8 @@
                 }
             };
 
-            // الوصول لصفوف البيانات المفلترة وإعادة تجميع الإحصائيات ديناميكياً
             if(rawServerData.allRowsRaw) {
                 rawServerData.allRowsRaw.forEach(row => {
-                    // التحقق من مطابقة الصف لجميع شروط الفلاتر المختارة
                     if (selectedGov && row.gov !== selectedGov) return;
                     if (selectedCenter && row.center !== selectedCenter) return;
                     if (selectedUni && row.uni !== selectedUni) return;
@@ -367,24 +365,20 @@
 
                     filteredStats.totalRecords++;
 
-                    // حساب نوع التطوع
+                    // المتطوع الذي اختار كلاهما يتم حسابه مرتين (مرة للـ Offline ومرة للـ Online) كما هو مطلوب
                     if(row.isOffline) { filteredStats.offlineRecords++; filteredStats.volunteerType["Offline"]++; }
                     if(row.isOnline) { filteredStats.onlineRecords++; filteredStats.volunteerType["Online"]++; }
 
-                    // حساب اللجان
                     if(row.committee) { filteredStats.committees[row.committee] = (filteredStats.committees[row.committee] || 0) + 1; }
 
-                    // حساب الأيام المحددة بدقة
                     if(row.daysList) {
                         row.daysList.forEach(d => { if(filteredStats.availableDays[d] !== undefined) filteredStats.availableDays[d]++; });
                     }
 
-                    // حساب المهام لكل مهمة بشكل مستقل
                     if(row.tasksList) {
                         row.tasksList.forEach(t => { if(t) filteredStats.desiredTasks[t] = (filteredStats.desiredTasks[t] || 0) + 1; });
                     }
 
-                    // حساب بنود الرضا لقيم التصفية الحالية
                     const addSat = (val, subObj) => { if(val && subObj[val] !== undefined) subObj[val]++; };
                     addSat(row.satTime, filteredStats.satisfaction.communicationTime);
                     addSat(row.satAccess, filteredStats.satisfaction.accessEase);
@@ -392,12 +386,8 @@
                     addSat(row.satContent, filteredStats.satisfaction.contentClarity);
                     addSat(row.satPresenter, filteredStats.satisfaction.presenterPerformance);
                 });
-            } else {
-                // باك آب حمايتي في حال لم يتم تحديث الـ App Script بعد
-                filteredStats = rawServerData;
             }
 
-            // تحديث كروت الأرقام بناءً على الفلترة التفاعلية الحية
             document.getElementById("kpiTotal").innerText = filteredStats.totalRecords;
             document.getElementById("kpiField").innerText = filteredStats.offlineRecords;
             document.getElementById("kpiRemote").innerText = filteredStats.onlineRecords;
@@ -410,24 +400,37 @@
             const textLableColor = isDark ? '#94a3b8' : '#475569';
             const gridBorderColor = isDark ? '#334155' : '#e2e8f0';
 
-            // باليتات ألوان مميزة ومتنوعة جداً لكل رسم بياني على حدة من أجل المظهر الاحترافي
             const colorsType = ['#4fc3f7', '#4db6ac'];
             const colorsCommittees = ['#ff8a65', '#ba68c8', '#64b5f6', '#81c784', '#ffd54f', '#90a4ae'];
-            const colorsDays = ['#ffb74d', '#ffb74d', '#ffb74d', '#ffb74d', '#ffb74d', '#ffb74d', '#ffb74d'];
-            const colorsTasks = ['#a1887f', '#e57373', '#f06292', '#4dd0e1', '#9575cd', '#dce775', '#a1887f', '#4682B4'];
+            const colorsTasks = ['#a1887f', '#e57373', '#f06292', '#4dd0e1', '#9575cd', '#dce775', '#4682B4'];
             const bluePalette = ['#0284c7', '#38bdf8', '#4bc0c0', '#ffcf9f', '#b3a2e7'];
 
+            // الإعدادات الموحدة لإظهار الأرقام كأعداد صحيحة أعلى الأعمدة
             const baseOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: { 
+                    legend: { display: false },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        color: textLableColor,
+                        font: { weight: 'bold', size: 11 },
+                        formatter: function(value) { return value > 0 ? value : ''; } // إخفاء الأصفار للمظهر الجمالي
+                    }
+                },
                 scales: {
                     x: { grid: { color: gridBorderColor }, ticks: { color: textLableColor, font: { family: 'Segoe UI', size: 12 } } },
-                    y: { grid: { color: gridBorderColor }, ticks: { color: textLableColor, stepSize: 1, precision: 0 }, beginAtZero: true }
+                    y: { 
+                        grid: { color: gridBorderColor }, 
+                        ticks: { color: textLableColor, stepSize: 1, precision: 0 }, 
+                        beginAtZero: true,
+                        grace: '10%' // ترك مساحة كافية بالأعلى لظهور الرقم بدون قص
+                    }
                 }
             };
 
-            // 1. رغبة التطوع عن بعد ام ميداني (أعمدة ملونة)
+            // 1. نوع التطوع
             if(charts.type) charts.type.destroy();
             charts.type = new Chart(document.getElementById("typeChart"), {
                 type: 'bar',
@@ -438,7 +441,7 @@
                 options: baseOptions
             });
 
-            // 2. اللجان المرغوب التطوع بها (أعمدة بألوان متباينة ومتناسقة)
+            // 2. اللجان
             if(charts.committee) charts.committee.destroy();
             charts.committee = new Chart(document.getElementById("committeeChart"), {
                 type: 'bar',
@@ -449,10 +452,10 @@
                 options: baseOptions
             });
 
-            // 3. ايام المشاركه و الإتاحه (تثبيت الأيام السبعة بالكامل عربياً من السبت للجمعة)
+            // 3. أيام المشاركة (إظهار كل الأيام الـ 7 إجبارياً كما طلبتِ)
             if(charts.days) charts.days.destroy();
             const daysLabels = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
-            const daysValues = daysLabels.map(day => (data.availableDays && data.availableDays[day]) ? data.availableDays[day] : 0);
+            const daysValues = daysLabels.map(day => data.availableDays[day] || 0);
 
             charts.days = new Chart(document.getElementById("daysChart"), {
                 type: 'bar',
@@ -463,7 +466,7 @@
                 options: baseOptions
             });
 
-            // 4. المهام التي يرغب المتطوعون بالمشاركة بها (أعمدة ملونة بالكامل وبأرقام صحيحة دقيقة)
+            // 4. المهام (إحصائية شاملة لكل النصوص عربي/إنجليزي)
             if(charts.tasks) charts.tasks.destroy();
             charts.tasks = new Chart(document.getElementById("tasksChart"), {
                 type: 'bar',
@@ -474,10 +477,14 @@
                 options: baseOptions
             });
 
-            // 5. تقييمات الرضا
+            // 5. تقييمات الرضا (الخماسي)
             if(charts.satisfaction) charts.satisfaction.destroy();
             const ratingLabels = ["ممتاز", "جيد جداً", "جيد", "مقبول", "سيء"];
-            const getRatingArray = (subObj) => subObj ? ratingLabels.map(l => subObj[l] || 0) : [0,0,0,0,0];
+            const getRatingArray = (subObj) => ratingLabels.map(l => subObj ? (subObj[l] || 0) : 0);
+
+            let satOptions = JSON.parse(JSON.stringify(baseOptions));
+            satOptions.plugins.legend = { display: true, labels: { color: textLableColor, font: { family: 'Segoe UI' } } };
+            satOptions.plugins.datalabels.formatter = function(value) { return value > 0 ? value : ''; };
 
             charts.satisfaction = new Chart(document.getElementById("satisfactionChart"), {
                 type: 'bar',
@@ -491,7 +498,7 @@
                         { label: 'أداء مقدم الاستقبال', data: getRatingArray(data.satisfaction?.presenterPerformance), backgroundColor: bluePalette[4] }
                     ]
                 },
-                options: { ...baseOptions, plugins: { legend: { display: true, labels: { color: textLableColor } } } }
+                options: satOptions
             });
         }
 
