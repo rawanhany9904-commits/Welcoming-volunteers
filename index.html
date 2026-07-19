@@ -363,18 +363,7 @@
                     if (selectedUni && row.uni !== selectedUni) return;
                     if (selectedCommittee && row.committee !== selectedCommittee) return;
 
-                    filteredStats.totalRecords++;
-
-                    // المتطوع الذي اختار كلاهما يتم حسابه مرتين (مرة للـ Offline ومرة للـ Online) كما هو مطلوب
-                    if(row.isOffline) { filteredStats.offlineRecords++; filteredStats.volunteerType["Offline"]++; }
-                    if(row.isOnline) { filteredStats.onlineRecords++; filteredStats.volunteerType["Online"]++; }
-
-                    if(row.committee) { filteredStats.committees[row.committee] = (filteredStats.committees[row.committee] || 0) + 1; }
-
-                    if(row.daysList) {
-                        row.daysList.forEach(d => { if(filteredStats.availableDays[d] !== undefined) filteredStats.availableDays[d]++; });
-                    }
-
+                    // حساب المهام مباشرةً بعد تعديل السيرفر
                     if(row.tasksList) {
                         row.tasksList.forEach(t => { if(t) filteredStats.desiredTasks[t] = (filteredStats.desiredTasks[t] || 0) + 1; });
                     }
@@ -394,7 +383,6 @@
 
             renderCharts(filteredStats);
         }
-
         function renderCharts(data) {
             const isDark = activeTheme === 'dark';
             const textLableColor = isDark ? '#94a3b8' : '#475569';
@@ -416,16 +404,18 @@
                         align: 'top',
                         color: textLableColor,
                         font: { weight: 'bold', size: 11 },
-                        formatter: function(value) { return value > 0 ? value : ''; } // إخفاء الأصفار للمظهر الجمالي
+                        formatter: function(value) { return value > 0 ? value : ''; }
                     }
                 },
                 scales: {
-                    x: { grid: { color: gridBorderColor }, ticks: { color: textLableColor, font: { family: 'Segoe UI', size: 12 } } },
+                    x: { grid: { color: gridBorderColor }, ticks: { color: textLableColor, font: { family: 'Segoe UI', size: 11 } } },
                     y: { 
                         grid: { color: gridBorderColor }, 
                         ticks: { color: textLableColor, stepSize: 1, precision: 0 }, 
                         beginAtZero: true,
-                        grace: '10%' // ترك مساحة كافية بالأعلى لظهور الرقم بدون قص
+                        // إجبار المحور أن يبدأ من 0 وينتهي عند 5 كحد أدنى حتى لو كانت البيانات أصفاراً
+                        suggestedMax: 5, 
+                        grace: '15%'
                     }
                 }
             };
