@@ -18,7 +18,6 @@
             --border-color: #cbd5e1;
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
             --transition: all 0.3s ease;
-            --footer-bg: #10355c;
         }
 
         [data-theme="dark"] {
@@ -31,7 +30,6 @@
             --accent-blue: #0c4a6e;
             --border-color: #334155;
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5);
-            --footer-bg: #0b1e36;
         }
 
         body {
@@ -57,19 +55,29 @@
 
         .header-title h1 {
             margin: 0;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
         }
 
-        .theme-toggle-btn {
-            background-color: rgba(255, 255, 255, 0.2);
-            border: 2px solid white;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
+        /* زرار وضع الليل والنهار الصغير */
+        .theme-btn-sm {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
             cursor: pointer;
-            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
             transition: var(--transition);
+            color: white;
+        }
+
+        .theme-btn-sm:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: scale(1.05);
         }
 
         .kpi-container {
@@ -189,8 +197,8 @@
         .chart-card h3 {
             margin: 0 0 15px 0;
             font-size: 16px;
-            border-left: 4px solid var(--primary-blue);
-            padding-left: 8px;
+            border-right: 4px solid var(--primary-blue);
+            padding-right: 8px;
         }
 
         .chart-container {
@@ -199,15 +207,14 @@
             width: 100%;
         }
 
-        /* ستايل جدول أسماء المتطوعين */
+        /* ستايل جدول المتطوعين مع السكرول */
         .table-section {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 20px;
             box-shadow: var(--shadow);
-            margin-bottom: 40px;
-            overflow-x: auto;
+            margin-bottom: 25px;
         }
 
         .table-section h3 {
@@ -216,10 +223,16 @@
             color: var(--primary-blue);
         }
 
+        .table-scroll-container {
+            max-height: 380px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
             font-size: 14px;
         }
 
@@ -233,21 +246,22 @@
             background-color: var(--accent-blue);
             color: var(--secondary-blue);
             font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 2;
         }
 
         tr:nth-child(even) {
             background-color: rgba(0,0,0,0.02);
         }
 
-        .footer-full-width {
-            background-color: var(--footer-bg);
-            color: #ffffff;
-            text-align: right;
-            padding: 15px 40px;
-            font-size: 16px;
-            font-weight: bold;
-            margin: 40px -20px -20px -20px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        /* الفوتر السفلي بخط صغير */
+        .dashboard-footer-small {
+            text-align: center;
+            padding: 15px 0;
+            font-size: 12px;
+            color: var(--text-muted);
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -257,7 +271,9 @@
         <div class="header-title">
             <h1>إستقبال متطوعين أسر صناع الحياة بالجامعات المصرية</h1>
         </div>
-        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">الوضع الليلي 🌙</button>
+        <button id="themeToggle" onclick="toggleTheme()" class="theme-btn-sm" title="تبديل الوضع">
+            <span id="themeIcon">🌙</span>
+        </button>
     </div>
 
     <div class="kpi-container">
@@ -332,6 +348,14 @@
             </div>
         </div>
 
+        <!-- الرسم البياني للجامعات المضاف حديثًا -->
+        <div class="chart-card" style="grid-column: span 2;">
+            <h3>ترتيب الجامعات الأكثر إقبالاً واستقبالاً للمتطوعين</h3>
+            <div class="chart-container" style="height: 350px;">
+                <canvas id="universitiesChart"></canvas>
+            </div>
+        </div>
+
         <div class="chart-card">
             <h3>ايام المشاركه و الإتاحه</h3>
             <div class="chart-container">
@@ -354,32 +378,34 @@
         </div>
     </div>
 
-    <!-- جدول المتطوعين المضاف حديثاً بناءً على طلبك -->
+    <!-- جدول المتطوعين بعيد العنوان وخاصية التمرير -->
     <div class="table-section">
-        <h3>قائمة المتطوعين المستقبَلين (تتأثر بالفلاتر المحددة)</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>كود المتطوع</th>
-                    <th>اسم المتطوع</th>
-                    <th>تاريخ الإستقبال</th>
-                    <th>المحافظة</th>
-                    <th>المركز</th>
-                    <th>الجامعة</th>
-                    <th>اللجنة المرغوبة</th>
-                </tr>
-            </thead>
-            <tbody id="volunteersTableBody">
-                <tr>
-                    <td colspan="7" style="text-align: center; color: var(--text-muted);">جاري تحميل البيانات...</td>
-                </tr>
-            </tbody>
-        </table>
+        <h3>قائمة المتطوعين (تتأثر بالفلاتر المحددة)</h3>
+        <div class="table-scroll-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>كود المتطوع</th>
+                        <th>اسم المتطوع</th>
+                        <th>تاريخ الإستقبال</th>
+                        <th>المحافظة</th>
+                        <th>المركز</th>
+                        <th>الجامعة</th>
+                        <th>اللجنة المرغوبة</th>
+                    </tr>
+                </thead>
+                <tbody id="volunteersTableBody">
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: var(--text-muted);">جاري تحميل البيانات...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="footer-full-width">
+    <footer class="dashboard-footer-small">
         أسر صناع الحياة بالجامعات المصرية_2026
-    </div>
+    </footer>
 
     <script>
         Chart.register(ChartDataLabels);
@@ -388,19 +414,18 @@
         let activeTheme = 'light';
         const charts = {};
 
-        // رابط الويب اب الخاص بكِ
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3DG9t0b6FBebvtIhd19KN9VfVeUb_gKWVDhkSAqS4QcAwUW5kafWNyn315atcUyWFxg/exec";
 
         function toggleTheme() {
             const body = document.body;
-            const btn = document.getElementById("themeToggleBtn");
+            const icon = document.getElementById("themeIcon");
             if (body.getAttribute("data-theme") === "dark") {
                 body.removeAttribute("data-theme");
-                btn.innerText = "الوضع الليلي 🌙";
+                icon.innerText = "🌙";
                 activeTheme = 'light';
             } else {
                 body.setAttribute("data-theme", "dark");
-                btn.innerText = "الوضع النهاري ☀️";
+                icon.innerText = "☀️";
                 activeTheme = 'dark';
             }
             filterData();
@@ -456,6 +481,7 @@
                 totalRecords: 0, onlineRecords: 0, offlineRecords: 0,
                 volunteerType: {"Offline": 0, "Online": 0},
                 committees: {},
+                universities: {},
                 availableDays: {"السبت": 0, "الأحد": 0, "الإثنين": 0, "الثلاثاء": 0, "الأربعاء": 0, "الخميس": 0, "الجمعة": 0},
                 desiredTasks: {},
                 satisfaction: {
@@ -468,15 +494,13 @@
             };
 
             const tableBody = document.getElementById("volunteersTableBody");
-            tableBody.innerHTML = ""; // تصفية الجدول
+            tableBody.innerHTML = "";
 
             if(rawServerData.allRowsRaw) {
                 rawServerData.allRowsRaw.forEach(row => {
-                    // تصفية التاريخ
                     if (startDate && row.date && row.date < startDate) return;
                     if (endDate && row.date && row.date > endDate) return;
 
-                    // تصفية الاختيارات الأخرى
                     if (selectedGov && row.gov !== selectedGov) return;
                     if (selectedCenter && row.center !== selectedCenter) return;
                     if (selectedUni && row.uni !== selectedUni) return;
@@ -488,6 +512,7 @@
                     if(row.isOnline) { filteredStats.onlineRecords++; filteredStats.volunteerType["Online"]++; }
 
                     if(row.committee) { filteredStats.committees[row.committee] = (filteredStats.committees[row.committee] || 0) + 1; }
+                    if(row.uni) { filteredStats.universities[row.uni] = (filteredStats.universities[row.uni] || 0) + 1; }
 
                     if(row.daysList) {
                         row.daysList.forEach(d => { 
@@ -508,16 +533,15 @@
                     addSat(row.satContent, filteredStats.satisfaction.contentClarity);
                     addSat(row.satPresenter, filteredStats.satisfaction.presenterPerformance);
 
-                    // إضافة صف للجدول التفاعلي
                     tableBody.innerHTML += `
                         <tr>
-                            <td>${row.code}</td>
-                            <td>**${row.name}**</td>
+                            <td>${row.code || ''}</td>
+                            <td><strong>${row.name || ''}</strong></td>
                             <td>${row.date || 'غير مسجل'}</td>
-                            <td>${row.gov}</td>
-                            <td>${row.center}</td>
-                            <td>${row.uni}</td>
-                            <td>${row.committee}</td>
+                            <td>${row.gov || ''}</td>
+                            <td>${row.center || ''}</td>
+                            <td>${row.uni || ''}</td>
+                            <td>${row.committee || ''}</td>
                         </tr>
                     `;
                 });
@@ -563,7 +587,6 @@
                         grid: { color: gridBorderColor }, 
                         ticks: { color: textLableColor, stepSize: 1, precision: 0 }, 
                         beginAtZero: true,
-                        suggestedMax: 5, 
                         grace: '15%'
                     }
                 }
@@ -591,7 +614,32 @@
                 options: baseOptions
             });
 
-            // 3. الأيام المتاحة
+            // 3. الرسم البياني للجامعات (أفقي ومترتب تنازلياً من الأعلى للأقل)
+            if(charts.universities) charts.universities.destroy();
+            const sortedUnis = Object.entries(data.universities || {}).sort((a, b) => b[1] - a[1]);
+            const uniLabels = sortedUnis.map(item => item[0]);
+            const uniValues = sortedUnis.map(item => item[1]);
+
+            let uniOptions = JSON.parse(JSON.stringify(baseOptions));
+            uniOptions.indexAxis = 'y'; // تحويله لأفقي
+            uniOptions.plugins.datalabels.anchor = 'end';
+            uniOptions.plugins.datalabels.align = 'right';
+
+            charts.universities = new Chart(document.getElementById("universitiesChart"), {
+                type: 'bar',
+                data: {
+                    labels: uniLabels,
+                    datasets: [{
+                        label: 'عدد المتطوعين',
+                        data: uniValues,
+                        backgroundColor: '#1d4ed8',
+                        borderRadius: 4
+                    }]
+                },
+                options: uniOptions
+            });
+
+            // 4. الأيام المتاحة
             if(charts.days) charts.days.destroy();
             const daysLabels = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
             const daysValues = daysLabels.map(day => data.availableDays[day] || 0);
@@ -605,7 +653,7 @@
                 options: baseOptions
             });
 
-            // 4. المهام المطلوبة
+            // 5. المهام المطلوبة
             if(charts.tasks) charts.tasks.destroy();
             charts.tasks = new Chart(document.getElementById("tasksChart"), {
                 type: 'bar',
@@ -616,14 +664,13 @@
                 options: baseOptions
             });
 
-            // 5. استبيانات الرضا
+            // 6. استبيانات الرضا
             if(charts.satisfaction) charts.satisfaction.destroy();
             const ratingLabels = ["ممتاز", "جيد جداً", "جيد", "مقبول", "سيء"];
             const getRatingArray = (subObj) => ratingLabels.map(l => subObj ? (subObj[l] || 0) : 0);
 
             let satOptions = JSON.parse(JSON.stringify(baseOptions));
             satOptions.plugins.legend = { display: true, labels: { color: textLableColor } };
-            satOptions.plugins.datalabels.formatter = function(value) { return value > 0 ? value : ''; };
 
             charts.satisfaction = new Chart(document.getElementById("satisfactionChart"), {
                 type: 'bar',
