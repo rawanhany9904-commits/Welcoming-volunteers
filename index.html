@@ -490,7 +490,11 @@
                     if(row.committee) { filteredStats.committees[row.committee] = (filteredStats.committees[row.committee] || 0) + 1; }
 
                     if(row.daysList) {
-                        row.daysList.forEach(d => { if(filteredStats.availableDays[d] !== undefined) filteredStats.availableDays[d]++; });
+                        row.daysList.forEach(d => { 
+                            if(filteredStats.availableDays[d] !== undefined) {
+                                filteredStats.availableDays[d]++; 
+                            }
+                        });
                     }
 
                     if(row.tasksList) {
