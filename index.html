@@ -41,25 +41,43 @@
             transition: var(--transition);
         }
 
+        /* الهيدر بدرجات الأزرق مع أيقونة للعنوان */
         .header-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            background: linear-gradient(135deg, #0284c7, #0369a1, #0f172a);
             color: white;
-            padding: 20px 30px;
+            padding: 22px 30px;
             border-radius: 15px;
             box-shadow: var(--shadow);
             margin-bottom: 25px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title .header-icon {
+            font-size: 28px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 12px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .header-title h1 {
             margin: 0;
             font-size: 22px;
             font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        /* زرار وضع الليل والنهار الصغير */
         .theme-btn-sm {
             background: rgba(255, 255, 255, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.4);
@@ -207,7 +225,6 @@
             width: 100%;
         }
 
-        /* ستايل جدول المتطوعين مع السكرول */
         .table-section {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -255,7 +272,6 @@
             background-color: rgba(0,0,0,0.02);
         }
 
-        /* الفوتر السفلي بخط صغير */
         .dashboard-footer-small {
             text-align: center;
             padding: 15px 0;
@@ -269,6 +285,7 @@
 
     <div class="header-container">
         <div class="header-title">
+            <span class="header-icon">🎓</span>
             <h1>إستقبال متطوعين أسر صناع الحياة بالجامعات المصرية</h1>
         </div>
         <button id="themeToggle" onclick="toggleTheme()" class="theme-btn-sm" title="تبديل الوضع">
@@ -348,7 +365,7 @@
             </div>
         </div>
 
-        <!-- الرسم البياني للجامعات المضاف حديثًا -->
+        <!-- الرسم البياني للجامعات -->
         <div class="chart-card" style="grid-column: span 2;">
             <h3>ترتيب الجامعات الأكثر إقبالاً واستقبالاً للمتطوعين</h3>
             <div class="chart-container" style="height: 350px;">
@@ -370,17 +387,18 @@
             </div>
         </div>
 
+        <!-- تم حذف العبارة المحددة من العنوان -->
         <div class="chart-card" style="grid-column: span 2;">
-            <h3>تحليل استبيانات مدى رضا المتطوعين عن بنود يوم الاستقبال (مقياس خماسي)</h3>
+            <h3>تحليل استبيانات مدى رضا المتطوعين عن بنود يوم الاستقبال</h3>
             <div class="chart-container" style="height: 340px;">
                 <canvas id="satisfactionChart"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- جدول المتطوعين بعيد العنوان وخاصية التمرير -->
+    <!-- تم حذف العبارة المحددة من عنوان الجدول -->
     <div class="table-section">
-        <h3>قائمة المتطوعين (تتأثر بالفلاتر المحددة)</h3>
+        <h3>قائمة المتطوعين</h3>
         <div class="table-scroll-container">
             <table>
                 <thead>
@@ -498,12 +516,14 @@
 
             if(rawServerData.allRowsRaw) {
                 rawServerData.allRowsRaw.forEach(row => {
+                    const uniVal = row.uni || row.university;
+
                     if (startDate && row.date && row.date < startDate) return;
                     if (endDate && row.date && row.date > endDate) return;
 
                     if (selectedGov && row.gov !== selectedGov) return;
                     if (selectedCenter && row.center !== selectedCenter) return;
-                    if (selectedUni && row.uni !== selectedUni) return;
+                    if (selectedUni && uniVal !== selectedUni) return;
                     if (selectedCommittee && row.committee !== selectedCommittee) return;
 
                     filteredStats.totalRecords++;
@@ -512,7 +532,10 @@
                     if(row.isOnline) { filteredStats.onlineRecords++; filteredStats.volunteerType["Online"]++; }
 
                     if(row.committee) { filteredStats.committees[row.committee] = (filteredStats.committees[row.committee] || 0) + 1; }
-                    if(row.uni) { filteredStats.universities[row.uni] = (filteredStats.universities[row.uni] || 0) + 1; }
+                    
+                    if(uniVal) { 
+                        filteredStats.universities[uniVal] = (filteredStats.universities[uniVal] || 0) + 1; 
+                    }
 
                     if(row.daysList) {
                         row.daysList.forEach(d => { 
@@ -540,7 +563,7 @@
                             <td>${row.date || 'غير مسجل'}</td>
                             <td>${row.gov || ''}</td>
                             <td>${row.center || ''}</td>
-                            <td>${row.uni || ''}</td>
+                            <td>${uniVal || ''}</td>
                             <td>${row.committee || ''}</td>
                         </tr>
                     `;
@@ -614,16 +637,17 @@
                 options: baseOptions
             });
 
-            // 3. الرسم البياني للجامعات (أفقي ومترتب تنازلياً من الأعلى للأقل)
+            // 3. الرسم البياني للجامعات (تم تصحيحه بالكامل للرسم الأفقي)
             if(charts.universities) charts.universities.destroy();
-            const sortedUnis = Object.entries(data.universities || {}).sort((a, b) => b[1] - a[1]);
+            
+            // تجميع وتجهيز بيانات الجامعات من السيرفر أو المفلترة
+            let uniSource = (data.universities && Object.keys(data.universities).length > 0) 
+                ? data.universities 
+                : (rawServerData && rawServerData.universities ? rawServerData.universities : {});
+
+            const sortedUnis = Object.entries(uniSource).sort((a, b) => b[1] - a[1]);
             const uniLabels = sortedUnis.map(item => item[0]);
             const uniValues = sortedUnis.map(item => item[1]);
-
-            let uniOptions = JSON.parse(JSON.stringify(baseOptions));
-            uniOptions.indexAxis = 'y'; // تحويله لأفقي
-            uniOptions.plugins.datalabels.anchor = 'end';
-            uniOptions.plugins.datalabels.align = 'right';
 
             charts.universities = new Chart(document.getElementById("universitiesChart"), {
                 type: 'bar',
@@ -632,11 +656,37 @@
                     datasets: [{
                         label: 'عدد المتطوعين',
                         data: uniValues,
-                        backgroundColor: '#1d4ed8',
+                        backgroundColor: '#0284c7',
                         borderRadius: 4
                     }]
                 },
-                options: uniOptions
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'right',
+                            color: textLableColor,
+                            font: { weight: 'bold', size: 11 },
+                            formatter: function(value) { return value > 0 ? value : ''; }
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            grid: { color: gridBorderColor }, 
+                            ticks: { color: textLableColor, precision: 0 },
+                            beginAtZero: true,
+                            grace: '10%'
+                        },
+                        y: { 
+                            grid: { display: false }, 
+                            ticks: { color: textLableColor, font: { family: 'Segoe UI', size: 12 } } 
+                        }
+                    }
+                }
             });
 
             // 4. الأيام المتاحة
