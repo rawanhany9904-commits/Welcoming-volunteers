@@ -41,7 +41,6 @@
             transition: var(--transition);
         }
 
-        /* الهيدر مع اللوجو بدلاً من الكاب */
         .header-container {
             display: flex;
             justify-content: space-between;
@@ -65,9 +64,9 @@
             height: 50px;
             border-radius: 10px;
             object-fit: contain;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 3px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            background: #ffffff;
+            padding: 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .header-title h1 {
@@ -136,22 +135,23 @@
             box-shadow: var(--shadow);
         }
 
-        /* توحيد ألوان جميع العناوين الفرعية لتطابق عنوان قائمة المتطوعين */
         .filter-section h2, 
         .chart-card h3, 
-        .table-section h3 {
-            margin: 0 0 15px 0;
+        .table-header h3 {
+            margin: 0;
             font-size: 18px;
             color: var(--primary-blue) !important;
             font-weight: bold;
         }
 
         .filter-section h2 {
+            margin-bottom: 15px;
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 8px;
         }
 
         .chart-card h3 {
+            margin-bottom: 15px;
             font-size: 16px;
             border-right: 4px solid var(--primary-blue);
             padding-right: 8px;
@@ -231,6 +231,7 @@
             width: 100%;
         }
 
+        /* تنسيق الهيدر الخاص بجدول المتطوعين وخانة البحث */
         .table-section {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -238,6 +239,38 @@
             padding: 20px;
             box-shadow: var(--shadow);
             margin-bottom: 25px;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-box input {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            outline: none;
+            font-size: 14px;
+            width: 220px;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 2px var(--accent-blue);
         }
 
         .table-scroll-container {
@@ -285,7 +318,7 @@
 
     <div class="header-container">
         <div class="header-title">
-            <img src="602463759_1267152008776107_5058421582285567564_n.jpg" alt="شعار أسر صناع الحياة" class="header-logo">
+            <img src="602463759_1267152008776107_5058421582285567564_n.jpg" alt="شعار أسر صناع الحياة" class="header-logo" onerror="this.src='https://i.ibb.co/Lhb8n73/life-makers-logo.jpg'">
             <h1>إستقبال متطوعين أسر صناع الحياة بالجامعات المصرية</h1>
         </div>
         <button id="themeToggle" onclick="toggleTheme()" class="theme-btn-sm" title="تبديل الوضع">
@@ -365,7 +398,6 @@
             </div>
         </div>
 
-        <!-- الرسم البياني للجامعات بالاسم الجديد -->
         <div class="chart-card" style="grid-column: span 2;">
             <h3>ترتيب الجامعات ( اعلى ل الأقل)</h3>
             <div class="chart-container" style="height: 350px;">
@@ -380,7 +412,6 @@
             </div>
         </div>
 
-        <!-- تحويل رسم المهام لشكل أفقي متدرج لعرض جميع المسميات بوضوح -->
         <div class="chart-card" style="grid-column: span 2;">
             <h3>المهام التي يرغب المتطوعون بالمشاركة بها</h3>
             <div class="chart-container" style="height: 400px;">
@@ -396,8 +427,14 @@
         </div>
     </div>
 
+    <!-- قسم جدول المتطوعين مع خانة البحث بخط موازي للعنوان -->
     <div class="table-section">
-        <h3>قائمة المتطوعين</h3>
+        <div class="table-header">
+            <h3>قائمة المتطوعين</h3>
+            <div class="search-box">
+                <input type="text" id="searchNameInput" placeholder="🔍 بحث باسم المتطوع..." onkeyup="filterData()">
+            </div>
+        </div>
         <div class="table-scroll-container">
             <table>
                 <thead>
@@ -481,6 +518,7 @@
             document.getElementById("filterCenter").value = "";
             document.getElementById("filterUni").value = "";
             document.getElementById("filterCommittee").value = "";
+            document.getElementById("searchNameInput").value = "";
             filterData();
         }
 
@@ -493,6 +531,7 @@
             const selectedCenter = document.getElementById("filterCenter").value;
             const selectedUni = document.getElementById("filterUni").value;
             const selectedCommittee = document.getElementById("filterCommittee").value;
+            const nameSearchQuery = document.getElementById("searchNameInput").value.trim().toLowerCase();
 
             let filteredStats = {
                 totalRecords: 0, onlineRecords: 0, offlineRecords: 0,
@@ -516,6 +555,10 @@
             if(rawServerData.allRowsRaw) {
                 rawServerData.allRowsRaw.forEach(row => {
                     const uniVal = row.uni || row.university;
+                    const volunteerName = (row.name || '').toLowerCase();
+
+                    // التصفية بحسب الاسم المكتوب في حقل البحث
+                    if (nameSearchQuery && !volunteerName.includes(nameSearchQuery)) return;
 
                     if (startDate && row.date && row.date < startDate) return;
                     if (endDate && row.date && row.date > endDate) return;
@@ -635,7 +678,7 @@
                 options: baseOptions
             });
 
-            // 3. الرسم البياني للجامعات (أفقي)
+            // 3. الجامعات
             if(charts.universities) charts.universities.destroy();
             let uniSource = (data.universities && Object.keys(data.universities).length > 0) 
                 ? data.universities 
@@ -675,7 +718,7 @@
                 }
             });
 
-            // 4. الأيام المتاحة
+            // 4. الأيام
             if(charts.days) charts.days.destroy();
             const daysLabels = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
             const daysValues = daysLabels.map(day => data.availableDays[day] || 0);
@@ -689,7 +732,7 @@
                 options: baseOptions
             });
 
-            // 5. المهام (تحويلها لرسم أفقي مرتب تنازلياً لإظهار كافة النصوص الطويلة بوضوح)
+            // 5. المهام
             if(charts.tasks) charts.tasks.destroy();
             let taskSource = (data.desiredTasks && Object.keys(data.desiredTasks).length > 0) 
                 ? data.desiredTasks 
@@ -729,7 +772,7 @@
                 }
             });
 
-            // 6. استبيانات الرضا
+            // 6. الرضا
             if(charts.satisfaction) charts.satisfaction.destroy();
             const ratingLabels = ["ممتاز", "جيد جداً", "جيد", "مقبول", "سيء"];
             const getRatingArray = (subObj) => ratingLabels.map(l => subObj ? (subObj[l] || 0) : 0);
