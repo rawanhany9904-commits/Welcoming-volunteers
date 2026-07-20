@@ -41,14 +41,14 @@
             transition: var(--transition);
         }
 
-        /* الهيدر بدرجات الأزرق مع أيقونة للعنوان */
+        /* الهيدر مع اللوجو بدلاً من الكاب */
         .header-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: linear-gradient(135deg, #0284c7, #0369a1, #0f172a);
             color: white;
-            padding: 22px 30px;
+            padding: 18px 25px;
             border-radius: 15px;
             box-shadow: var(--shadow);
             margin-bottom: 25px;
@@ -57,17 +57,17 @@
         .header-title {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
 
-        .header-title .header-icon {
-            font-size: 28px;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 8px 12px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .header-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            object-fit: contain;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
 
         .header-title h1 {
@@ -136,12 +136,25 @@
             box-shadow: var(--shadow);
         }
 
-        .filter-section h2 {
+        /* توحيد ألوان جميع العناوين الفرعية لتطابق عنوان قائمة المتطوعين */
+        .filter-section h2, 
+        .chart-card h3, 
+        .table-section h3 {
             margin: 0 0 15px 0;
             font-size: 18px;
-            color: var(--primary-blue);
+            color: var(--primary-blue) !important;
+            font-weight: bold;
+        }
+
+        .filter-section h2 {
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 8px;
+        }
+
+        .chart-card h3 {
+            font-size: 16px;
+            border-right: 4px solid var(--primary-blue);
+            padding-right: 8px;
         }
 
         .filter-grid {
@@ -212,13 +225,6 @@
             min-height: 350px;
         }
 
-        .chart-card h3 {
-            margin: 0 0 15px 0;
-            font-size: 16px;
-            border-right: 4px solid var(--primary-blue);
-            padding-right: 8px;
-        }
-
         .chart-container {
             position: relative;
             height: 280px;
@@ -232,12 +238,6 @@
             padding: 20px;
             box-shadow: var(--shadow);
             margin-bottom: 25px;
-        }
-
-        .table-section h3 {
-            margin: 0 0 15px 0;
-            font-size: 18px;
-            color: var(--primary-blue);
         }
 
         .table-scroll-container {
@@ -285,7 +285,7 @@
 
     <div class="header-container">
         <div class="header-title">
-            <span class="header-icon">🎓</span>
+            <img src="602463759_1267152008776107_5058421582285567564_n.jpg" alt="شعار أسر صناع الحياة" class="header-logo">
             <h1>إستقبال متطوعين أسر صناع الحياة بالجامعات المصرية</h1>
         </div>
         <button id="themeToggle" onclick="toggleTheme()" class="theme-btn-sm" title="تبديل الوضع">
@@ -365,9 +365,9 @@
             </div>
         </div>
 
-        <!-- الرسم البياني للجامعات -->
+        <!-- الرسم البياني للجامعات بالاسم الجديد -->
         <div class="chart-card" style="grid-column: span 2;">
-            <h3>ترتيب الجامعات الأكثر إقبالاً واستقبالاً للمتطوعين</h3>
+            <h3>ترتيب الجامعات ( اعلى ل الأقل)</h3>
             <div class="chart-container" style="height: 350px;">
                 <canvas id="universitiesChart"></canvas>
             </div>
@@ -380,14 +380,14 @@
             </div>
         </div>
 
-        <div class="chart-card">
+        <!-- تحويل رسم المهام لشكل أفقي متدرج لعرض جميع المسميات بوضوح -->
+        <div class="chart-card" style="grid-column: span 2;">
             <h3>المهام التي يرغب المتطوعون بالمشاركة بها</h3>
-            <div class="chart-container">
+            <div class="chart-container" style="height: 400px;">
                 <canvas id="tasksChart"></canvas>
             </div>
         </div>
 
-        <!-- تم حذف العبارة المحددة من العنوان -->
         <div class="chart-card" style="grid-column: span 2;">
             <h3>تحليل استبيانات مدى رضا المتطوعين عن بنود يوم الاستقبال</h3>
             <div class="chart-container" style="height: 340px;">
@@ -396,7 +396,6 @@
         </div>
     </div>
 
-    <!-- تم حذف العبارة المحددة من عنوان الجدول -->
     <div class="table-section">
         <h3>قائمة المتطوعين</h3>
         <div class="table-scroll-container">
@@ -588,7 +587,6 @@
 
             const colorsType = ['#4fc3f7', '#4db6ac'];
             const colorsCommittees = ['#ff8a65', '#ba68c8', '#64b5f6', '#81c784', '#ffd54f', '#90a4ae'];
-            const colorsTasks = ['#a1887f', '#e57373', '#f06292', '#4dd0e1', '#9575cd', '#dce775', '#4682B4'];
             const bluePalette = ['#0284c7', '#38bdf8', '#4bc0c0', '#ffcf9f', '#b3a2e7'];
 
             const baseOptions = {
@@ -637,25 +635,21 @@
                 options: baseOptions
             });
 
-            // 3. الرسم البياني للجامعات (تم تصحيحه بالكامل للرسم الأفقي)
+            // 3. الرسم البياني للجامعات (أفقي)
             if(charts.universities) charts.universities.destroy();
-            
-            // تجميع وتجهيز بيانات الجامعات من السيرفر أو المفلترة
             let uniSource = (data.universities && Object.keys(data.universities).length > 0) 
                 ? data.universities 
                 : (rawServerData && rawServerData.universities ? rawServerData.universities : {});
 
             const sortedUnis = Object.entries(uniSource).sort((a, b) => b[1] - a[1]);
-            const uniLabels = sortedUnis.map(item => item[0]);
-            const uniValues = sortedUnis.map(item => item[1]);
 
             charts.universities = new Chart(document.getElementById("universitiesChart"), {
                 type: 'bar',
                 data: {
-                    labels: uniLabels,
+                    labels: sortedUnis.map(item => item[0]),
                     datasets: [{
                         label: 'عدد المتطوعين',
-                        data: uniValues,
+                        data: sortedUnis.map(item => item[1]),
                         backgroundColor: '#0284c7',
                         borderRadius: 4
                     }]
@@ -675,16 +669,8 @@
                         }
                     },
                     scales: {
-                        x: { 
-                            grid: { color: gridBorderColor }, 
-                            ticks: { color: textLableColor, precision: 0 },
-                            beginAtZero: true,
-                            grace: '10%'
-                        },
-                        y: { 
-                            grid: { display: false }, 
-                            ticks: { color: textLableColor, font: { family: 'Segoe UI', size: 12 } } 
-                        }
+                        x: { grid: { color: gridBorderColor }, ticks: { color: textLableColor, precision: 0 }, beginAtZero: true, grace: '10%' },
+                        y: { grid: { display: false }, ticks: { color: textLableColor, font: { family: 'Segoe UI', size: 12 } } }
                     }
                 }
             });
@@ -703,15 +689,44 @@
                 options: baseOptions
             });
 
-            // 5. المهام المطلوبة
+            // 5. المهام (تحويلها لرسم أفقي مرتب تنازلياً لإظهار كافة النصوص الطويلة بوضوح)
             if(charts.tasks) charts.tasks.destroy();
+            let taskSource = (data.desiredTasks && Object.keys(data.desiredTasks).length > 0) 
+                ? data.desiredTasks 
+                : (rawServerData && rawServerData.desiredTasks ? rawServerData.desiredTasks : {});
+
+            const sortedTasks = Object.entries(taskSource).sort((a, b) => b[1] - a[1]);
+
             charts.tasks = new Chart(document.getElementById("tasksChart"), {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(data.desiredTasks || {}),
-                    datasets: [{ data: Object.values(data.desiredTasks || {}), backgroundColor: colorsTasks }]
+                    labels: sortedTasks.map(item => item[0]),
+                    datasets: [{
+                        label: 'عدد الراغبين',
+                        data: sortedTasks.map(item => item[1]),
+                        backgroundColor: '#0369a1',
+                        borderRadius: 4
+                    }]
                 },
-                options: baseOptions
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'right',
+                            color: textLableColor,
+                            font: { weight: 'bold', size: 11 },
+                            formatter: function(value) { return value > 0 ? value : ''; }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: gridBorderColor }, ticks: { color: textLableColor, precision: 0 }, beginAtZero: true, grace: '10%' },
+                        y: { grid: { display: false }, ticks: { color: textLableColor, font: { family: 'Segoe UI', size: 12 } } }
+                    }
+                }
             });
 
             // 6. استبيانات الرضا
