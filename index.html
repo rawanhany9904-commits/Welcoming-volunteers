@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>داش بورد إستقبال متطوعين أسر صناع الحياة</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- إضافة إضافة عرض الأرقام فوق الأعمدة مباشرة بشكل احترافي -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
         :root {
@@ -283,7 +282,6 @@
     </div>
 
     <script>
-        // تفعيل إضافة التسميات الرقمية على الأعمدة افتراضياً لجميع الجداول البيانية
         Chart.register(ChartDataLabels);
 
         let rawServerData = null; 
@@ -363,7 +361,17 @@
                     if (selectedUni && row.uni !== selectedUni) return;
                     if (selectedCommittee && row.committee !== selectedCommittee) return;
 
-                    // حساب المهام مباشرةً بعد تعديل السيرفر
+                    filteredStats.totalRecords++;
+
+                    if(row.isOffline) { filteredStats.offlineRecords++; filteredStats.volunteerType["Offline"]++; }
+                    if(row.isOnline) { filteredStats.onlineRecords++; filteredStats.volunteerType["Online"]++; }
+
+                    if(row.committee) { filteredStats.committees[row.committee] = (filteredStats.committees[row.committee] || 0) + 1; }
+
+                    if(row.daysList) {
+                        row.daysList.forEach(d => { if(filteredStats.availableDays[d] !== undefined) filteredStats.availableDays[d]++; });
+                    }
+
                     if(row.tasksList) {
                         row.tasksList.forEach(t => { if(t) filteredStats.desiredTasks[t] = (filteredStats.desiredTasks[t] || 0) + 1; });
                     }
@@ -383,6 +391,7 @@
 
             renderCharts(filteredStats);
         }
+
         function renderCharts(data) {
             const isDark = activeTheme === 'dark';
             const textLableColor = isDark ? '#94a3b8' : '#475569';
@@ -393,7 +402,6 @@
             const colorsTasks = ['#a1887f', '#e57373', '#f06292', '#4dd0e1', '#9575cd', '#dce775', '#4682B4'];
             const bluePalette = ['#0284c7', '#38bdf8', '#4bc0c0', '#ffcf9f', '#b3a2e7'];
 
-            // الإعدادات الموحدة لإظهار الأرقام كأعداد صحيحة أعلى الأعمدة
             const baseOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -413,7 +421,6 @@
                         grid: { color: gridBorderColor }, 
                         ticks: { color: textLableColor, stepSize: 1, precision: 0 }, 
                         beginAtZero: true,
-                        // إجبار المحور أن يبدأ من 0 وينتهي عند 5 كحد أدنى حتى لو كانت البيانات أصفاراً
                         suggestedMax: 5, 
                         grace: '15%'
                     }
@@ -442,7 +449,7 @@
                 options: baseOptions
             });
 
-            // 3. أيام المشاركة (إظهار كل الأيام الـ 7 إجبارياً كما طلبتِ)
+            // 3. الأيام المتاحة
             if(charts.days) charts.days.destroy();
             const daysLabels = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
             const daysValues = daysLabels.map(day => data.availableDays[day] || 0);
@@ -456,7 +463,7 @@
                 options: baseOptions
             });
 
-            // 4. المهام (إحصائية شاملة لكل النصوص عربي/إنجليزي)
+            // 4. المهام المطلوبة
             if(charts.tasks) charts.tasks.destroy();
             charts.tasks = new Chart(document.getElementById("tasksChart"), {
                 type: 'bar',
@@ -467,13 +474,13 @@
                 options: baseOptions
             });
 
-            // 5. تقييمات الرضا (الخماسي)
+            // 5. استبيانات الرضا
             if(charts.satisfaction) charts.satisfaction.destroy();
             const ratingLabels = ["ممتاز", "جيد جداً", "جيد", "مقبول", "سيء"];
             const getRatingArray = (subObj) => ratingLabels.map(l => subObj ? (subObj[l] || 0) : 0);
 
             let satOptions = JSON.parse(JSON.stringify(baseOptions));
-            satOptions.plugins.legend = { display: true, labels: { color: textLableColor, font: { family: 'Segoe UI' } } };
+            satOptions.plugins.legend = { display: true, labels: { color: textLableColor } };
             satOptions.plugins.datalabels.formatter = function(value) { return value > 0 ? value : ''; };
 
             charts.satisfaction = new Chart(document.getElementById("satisfactionChart"), {
