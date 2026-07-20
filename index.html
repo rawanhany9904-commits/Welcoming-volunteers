@@ -120,8 +120,9 @@
 
         .filter-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
+            align-items: flex-end;
         }
 
         .filter-group {
@@ -136,7 +137,7 @@
             color: var(--text-muted);
         }
 
-        .filter-group select {
+        .filter-group select, .filter-group input {
             padding: 10px;
             border-radius: 6px;
             border: 1px solid var(--border-color);
@@ -145,11 +146,35 @@
             outline: none;
         }
 
+        .btn-apply {
+            background-color: var(--secondary-blue);
+            color: white;
+            border: none;
+            padding: 11px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-reset {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 11px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-apply:hover { background-color: var(--primary-blue); }
+
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
             gap: 25px;
-            margin-bottom: 40px;
+            margin-bottom: 25px;
         }
 
         .chart-card {
@@ -172,6 +197,46 @@
             position: relative;
             height: 280px;
             width: 100%;
+        }
+
+        /* ستايل جدول أسماء المتطوعين */
+        .table-section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 40px;
+            overflow-x: auto;
+        }
+
+        .table-section h3 {
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            color: var(--primary-blue);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: right;
+        }
+
+        th {
+            background-color: var(--accent-blue);
+            color: var(--secondary-blue);
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(0,0,0,0.02);
         }
 
         .footer-full-width {
@@ -214,28 +279,40 @@
         <h2>تصفية وفلترة البيانات المتقدمة</h2>
         <div class="filter-grid">
             <div class="filter-group">
-                <label for="filterGov">المحافظة</label>
-                <select id="filterGov" onchange="filterData()">
+                <label>من تاريخ:</label>
+                <input type="date" id="filterStartDate">
+            </div>
+            <div class="filter-group">
+                <label>إلى تاريخ:</label>
+                <input type="date" id="filterEndDate">
+            </div>
+            <div class="filter-group">
+                <label>المحافظة</label>
+                <select id="filterGov">
                     <option value="">كل المحافظات</option>
                 </select>
             </div>
             <div class="filter-group">
-                <label for="filterCenter">المركز</label>
-                <select id="filterCenter" onchange="filterData()">
+                <label>المركز</label>
+                <select id="filterCenter">
                     <option value="">كل المراكز</option>
                 </select>
             </div>
             <div class="filter-group">
-                <label for="filterUni">الجامعة التي تم الالتحاق بها</label>
-                <select id="filterUni" onchange="filterData()">
+                <label>الجامعة</label>
+                <select id="filterUni">
                     <option value="">كل الجامعات</option>
                 </select>
             </div>
             <div class="filter-group">
-                <label for="filterCommittee">اللجنة التي ترغب بالانضمام لها</label>
-                <select id="filterCommittee" onchange="filterData()">
+                <label>اللجنة</label>
+                <select id="filterCommittee">
                     <option value="">كل اللجان</option>
                 </select>
+            </div>
+            <div>
+                <button class="btn-apply" onclick="filterData()">تطبيق الفلتر</button>
+                <button class="btn-reset" onclick="resetFilters()">إعادة تعيين</button>
             </div>
         </div>
     </div>
@@ -277,6 +354,29 @@
         </div>
     </div>
 
+    <!-- جدول المتطوعين المضاف حديثاً بناءً على طلبك -->
+    <div class="table-section">
+        <h3>قائمة المتطوعين المستقبَلين (تتأثر بالفلاتر المحددة)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>كود المتطوع</th>
+                    <th>اسم المتطوع</th>
+                    <th>تاريخ الإستقبال</th>
+                    <th>المحافظة</th>
+                    <th>المركز</th>
+                    <th>الجامعة</th>
+                    <th>اللجنة المرغوبة</th>
+                </tr>
+            </thead>
+            <tbody id="volunteersTableBody">
+                <tr>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted);">جاري تحميل البيانات...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
     <div class="footer-full-width">
         أسر صناع الحياة بالجامعات المصرية_2026
     </div>
@@ -288,6 +388,7 @@
         let activeTheme = 'light';
         const charts = {};
 
+        // رابط الويب اب الخاص بكِ
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxowJeIfJ5mnNI5ss9mRt9lTX8XgBwxXSdIBrrQqQZzNK7xgboJeq-7UFh7IuRk1Aez7g/exec";
 
         function toggleTheme() {
@@ -331,9 +432,21 @@
             fillSelect("filterCommittee", data.committees);
         }
 
+        function resetFilters() {
+            document.getElementById("filterStartDate").value = "";
+            document.getElementById("filterEndDate").value = "";
+            document.getElementById("filterGov").value = "";
+            document.getElementById("filterCenter").value = "";
+            document.getElementById("filterUni").value = "";
+            document.getElementById("filterCommittee").value = "";
+            filterData();
+        }
+
         function filterData() {
             if (!rawServerData) return;
 
+            const startDate = document.getElementById("filterStartDate").value;
+            const endDate = document.getElementById("filterEndDate").value;
             const selectedGov = document.getElementById("filterGov").value;
             const selectedCenter = document.getElementById("filterCenter").value;
             const selectedUni = document.getElementById("filterUni").value;
@@ -354,8 +467,16 @@
                 }
             };
 
+            const tableBody = document.getElementById("volunteersTableBody");
+            tableBody.innerHTML = ""; // تصفية الجدول
+
             if(rawServerData.allRowsRaw) {
                 rawServerData.allRowsRaw.forEach(row => {
+                    // تصفية التاريخ
+                    if (startDate && row.date && row.date < startDate) return;
+                    if (endDate && row.date && row.date > endDate) return;
+
+                    // تصفية الاختيارات الأخرى
                     if (selectedGov && row.gov !== selectedGov) return;
                     if (selectedCenter && row.center !== selectedCenter) return;
                     if (selectedUni && row.uni !== selectedUni) return;
@@ -382,7 +503,24 @@
                     addSat(row.satPlace, filteredStats.satisfaction.placeSuitability);
                     addSat(row.satContent, filteredStats.satisfaction.contentClarity);
                     addSat(row.satPresenter, filteredStats.satisfaction.presenterPerformance);
+
+                    // إضافة صف للجدول التفاعلي
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td>${row.code}</td>
+                            <td>**${row.name}**</td>
+                            <td>${row.date || 'غير مسجل'}</td>
+                            <td>${row.gov}</td>
+                            <td>${row.center}</td>
+                            <td>${row.uni}</td>
+                            <td>${row.committee}</td>
+                        </tr>
+                    `;
                 });
+            }
+
+            if(filteredStats.totalRecords === 0) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا توجد بيانات مطابقة للبحث الحالي.</td></tr>`;
             }
 
             document.getElementById("kpiTotal").innerText = filteredStats.totalRecords;
