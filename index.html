@@ -3,84 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>داش بورد إستقبال متطوعين أسر صناع الحياة</title>
+    <title>استقبال نوادي صناع الحياه</title>
+    <link rel="icon" href="logo%20نوادي%20صناع%20الحياة.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
         :root {
-            --bg-color: #f0f4f8;
+            /* ألوان الهوية من اللوجو: كحلي #054B7A + برتقالي #EF7109 */
+            --bg-color: #f4f8fb;
             --card-bg: #ffffff;
-            --text-color: #1e293b;
-            --text-muted: #64748b;
-            --primary-blue: #0284c7;
-            --secondary-blue: #0369a1;
-            --accent-blue: #e0f2fe;
-            --border-color: #cbd5e1;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --text-color: #0b2a40;
+            --text-muted: #5b7285;
+            --primary-blue: #054b7a;
+            --secondary-blue: #043a5e;
+            --accent-blue: #e6eff6;
+            --orange: #ef7109;
+            --orange-soft: #fdebda;
+            --border-color: #d3e0ea;
+            --shadow: 0 2px 8px rgb(5 75 122 / 0.10);
             --transition: all 0.3s ease;
         }
 
         [data-theme="dark"] {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
-            --primary-blue: #38bdf8;
-            --secondary-blue: #7dd3fc;
-            --accent-blue: #0c4a6e;
-            --border-color: #334155;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+            --bg-color: #0a1a26;
+            --card-bg: #10293b;
+            --text-color: #eaf2f8;
+            --text-muted: #9fb6c7;
+            --primary-blue: #5ab0e8;
+            --secondary-blue: #7fbbe6;
+            --accent-blue: #16384f;
+            --orange: #ff8a2b;
+            --orange-soft: #3a2a18;
+            --border-color: #23415a;
+            --shadow: 0 2px 8px rgb(0 0 0 / 0.45);
         }
+
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 20px 20px 0;
             transition: var(--transition);
         }
 
+        .hidden { display: none !important; }
+
+        /* ---------- الهيدر ---------- */
         .header-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(135deg, #0284c7, #0369a1, #0f172a);
+            background: linear-gradient(135deg, #054b7a, #0a68a3);
             color: white;
-            padding: 18px 25px;
+            padding: 14px 25px;
             border-radius: 15px;
+            border-bottom: 5px solid var(--orange);
             box-shadow: var(--shadow);
             margin-bottom: 25px;
+        }
+
+        [data-theme="dark"] .header-container {
+            background: linear-gradient(135deg, #043a5e, #054b7a);
         }
 
         .header-title {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 16px;
+        }
+
+        /* اللوجو خلفيته بيضاء وفيه هوامش فاضية: بنقصّها جوه شارة بيضاء */
+        .logo-badge {
+            width: 132px;
+            height: 76px;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
         }
 
         .header-logo {
-    width: 50px;
-    height: 50px;
-    border-radius: 10px;
-    object-fit: contain;
-    mix-blend-mode: multiply; /* يدمج الخلفية البيضاء مع خلفية الهيدر */
-}
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+        }
 
         .header-title h1 {
             margin: 0;
-            font-size: 22px;
+            font-size: 26px;
             font-weight: bold;
             color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .theme-btn-sm {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.45);
             border-radius: 50%;
-            width: 38px;
-            height: 38px;
+            width: 40px;
+            height: 40px;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -91,10 +116,11 @@
         }
 
         .theme-btn-sm:hover {
-            background: rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.32);
             transform: scale(1.05);
         }
 
+        /* ---------- كروت الأرقام ---------- */
         .kpi-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -105,12 +131,16 @@
         .kpi-card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
+            border-top: 4px solid var(--primary-blue);
             padding: 20px;
             border-radius: 12px;
             box-shadow: var(--shadow);
             text-align: center;
             transition: var(--transition);
         }
+
+        .kpi-card:nth-child(2) { border-top-color: var(--orange); }
+        .kpi-card:nth-child(3) { border-top-color: #2a7fb8; }
 
         .kpi-card h3 {
             margin: 0 0 10px 0;
@@ -119,11 +149,16 @@
         }
 
         .kpi-card .number {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: bold;
             color: var(--primary-blue);
         }
 
+        .kpi-card:nth-child(2) .number { color: var(--orange); }
+        .kpi-card:nth-child(3) .number { color: #2a7fb8; }
+        [data-theme="dark"] .kpi-card:nth-child(3) .number { color: #8ccbf2; }
+
+        /* ---------- الفلاتر ---------- */
         .filter-section {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -133,25 +168,26 @@
             box-shadow: var(--shadow);
         }
 
-        .filter-section h2, 
-        .chart-card h3, 
+        .filter-section h2,
+        .chart-card h3,
         .table-header h3 {
             margin: 0;
             font-size: 18px;
-            color: var(--primary-blue) !important;
+            color: var(--primary-blue);
             font-weight: bold;
         }
 
         .filter-section h2 {
             margin-bottom: 15px;
-            border-bottom: 2px solid var(--border-color);
+            border-bottom: 2px solid var(--orange);
             padding-bottom: 8px;
+            display: inline-block;
         }
 
         .chart-card h3 {
             margin-bottom: 15px;
             font-size: 16px;
-            border-right: 4px solid var(--primary-blue);
+            border-right: 4px solid var(--orange);
             padding-right: 8px;
         }
 
@@ -162,10 +198,7 @@
             align-items: flex-end;
         }
 
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-        }
+        .filter-group { display: flex; flex-direction: column; }
 
         .filter-group label {
             font-size: 13px;
@@ -183,8 +216,14 @@
             outline: none;
         }
 
+        .filter-group select:focus, .filter-group input:focus,
+        .search-box input:focus, .pin-row input:focus {
+            border-color: var(--orange);
+            box-shadow: 0 0 0 2px var(--orange-soft);
+        }
+
         .btn-apply {
-            background-color: var(--secondary-blue);
+            background-color: var(--primary-blue);
             color: white;
             border: none;
             padding: 11px 20px;
@@ -192,7 +231,13 @@
             font-weight: bold;
             cursor: pointer;
             transition: var(--transition);
+            font-family: inherit;
         }
+
+        [data-theme="dark"] .btn-apply { color: #062033; }
+
+        .btn-apply:hover { background-color: var(--orange); color: #fff; }
+        .btn-apply:disabled { opacity: 0.6; cursor: wait; }
 
         .btn-reset {
             background-color: transparent;
@@ -203,13 +248,15 @@
             font-weight: bold;
             cursor: pointer;
             transition: var(--transition);
+            font-family: inherit;
         }
 
-        .btn-apply:hover { background-color: var(--primary-blue); }
+        .btn-reset:hover { border-color: var(--orange); color: var(--orange); }
 
+        /* ---------- الرسوم ---------- */
         .charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(450px, 100%), 1fr));
             gap: 25px;
             margin-bottom: 25px;
         }
@@ -223,13 +270,15 @@
             min-height: 350px;
         }
 
+        .chart-card.wide { grid-column: 1 / -1; }
+
         .chart-container {
             position: relative;
             height: 280px;
             width: 100%;
         }
 
-        /* تنسيق الهيدر الخاص بجدول المتطوعين وخانة البحث */
+        /* ---------- جدول المتطوعين (محمي) ---------- */
         .table-section {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -248,14 +297,10 @@
             gap: 10px;
         }
 
-        .search-box {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .search-box { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
         .search-box input {
-            padding: 8px 14px;
+            padding: 9px 14px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
             background-color: var(--bg-color);
@@ -266,23 +311,57 @@
             transition: var(--transition);
         }
 
-        .search-box input:focus {
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 2px var(--accent-blue);
+        .search-box .btn-reset { padding: 9px 14px; }
+
+        .locked-panel {
+            text-align: center;
+            padding: 30px 15px;
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-color);
         }
+
+        .locked-panel .lock-icon { font-size: 38px; margin-bottom: 6px; }
+        .locked-panel p { margin: 0 0 16px; color: var(--text-muted); font-size: 15px; }
+
+        .pin-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pin-row input {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            outline: none;
+            font-size: 16px;
+            width: 200px;
+            text-align: center;
+            letter-spacing: 4px;
+        }
+
+        .pin-error {
+            margin-top: 12px;
+            min-height: 20px;
+            color: #d93025;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        [data-theme="dark"] .pin-error { color: #ff8a80; }
 
         .table-scroll-container {
             max-height: 380px;
-            overflow-y: auto;
+            overflow: auto;
             border: 1px solid var(--border-color);
             border-radius: 8px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
 
         th, td {
             border: 1px solid var(--border-color);
@@ -291,37 +370,41 @@
         }
 
         th {
-            background-color: var(--accent-blue);
-            color: var(--secondary-blue);
+            background-color: var(--primary-blue);
+            color: #ffffff;
             font-weight: bold;
             position: sticky;
             top: 0;
             z-index: 2;
+            white-space: nowrap;
         }
 
-        tr:nth-child(even) {
-            background-color: rgba(0,0,0,0.02);
-        }
+        [data-theme="dark"] th { background-color: #1f5f8f; }
 
-        .dashboard-footer-small {
+        tbody tr:nth-child(even) { background-color: var(--accent-blue); }
+
+        .table-count { margin-top: 10px; font-size: 13px; color: var(--text-muted); }
+
+        /* ---------- الختم الرسمي ---------- */
+        .dashboard-footer {
+            background: #054b7a;
+            color: #ffffff;
             text-align: center;
-            padding: 15px 0;
-            font-size: 12px;
-            color: var(--text-muted);
-            opacity: 0.8;
+            padding: 18px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            border-top: 4px solid var(--orange);
+            margin: 0 -20px;
         }
-          @media (max-width: 600px) {
-            .header-container {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            .header-title h1 {
-                font-size: 16px;
-            }
-            .search-box input {
-                width: 100%;
-            }
+
+        [data-theme="dark"] .dashboard-footer { background: #043a5e; }
+
+        @media (max-width: 600px) {
+            .header-container { flex-direction: column; gap: 12px; text-align: center; }
+            .header-title { flex-direction: column; gap: 10px; }
+            .header-title h1 { font-size: 20px; }
+            .search-box input { width: 100%; }
+            .chart-card { padding: 14px; }
         }
     </style>
 </head>
@@ -329,8 +412,10 @@
 
     <div class="header-container">
         <div class="header-title">
-            <img src="logo.jpg" alt="شعار أسر صناع الحياة" class="header-logo">
-            <h1>إستقبال متطوعين أسر صناع الحياة بالجامعات المصرية</h1>
+            <div class="logo-badge">
+                <img src="logo%20نوادي%20صناع%20الحياة.png" alt="شعار نوادي صناع الحياة" class="header-logo">
+            </div>
+            <h1>استقبال نوادي صناع الحياه</h1>
         </div>
         <button id="themeToggle" onclick="toggleTheme()" class="theme-btn-sm" title="تبديل الوضع">
             <span id="themeIcon">🌙</span>
@@ -357,33 +442,33 @@
         <div class="filter-grid">
             <div class="filter-group">
                 <label>من تاريخ:</label>
-                <input type="date" id="filterStartDate">
+                <input type="date" id="filterStartDate" onchange="filterData()">
             </div>
             <div class="filter-group">
                 <label>إلى تاريخ:</label>
-                <input type="date" id="filterEndDate">
+                <input type="date" id="filterEndDate" onchange="filterData()">
             </div>
             <div class="filter-group">
                 <label>المحافظة</label>
-                <select id="filterGov">
+                <select id="filterGov" onchange="filterData()">
                     <option value="">كل المحافظات</option>
                 </select>
             </div>
             <div class="filter-group">
                 <label>المركز</label>
-                <select id="filterCenter">
+                <select id="filterCenter" onchange="filterData()">
                     <option value="">كل المراكز</option>
                 </select>
             </div>
             <div class="filter-group">
                 <label>الجامعة</label>
-                <select id="filterUni">
+                <select id="filterUni" onchange="filterData()">
                     <option value="">كل الجامعات</option>
                 </select>
             </div>
             <div class="filter-group">
                 <label>اللجنة</label>
-                <select id="filterCommittee">
+                <select id="filterCommittee" onchange="filterData()">
                     <option value="">كل اللجان</option>
                 </select>
             </div>
@@ -409,28 +494,28 @@
             </div>
         </div>
 
-        <div class="chart-card" style="grid-column: span 2;">
+        <div class="chart-card wide">
             <h3>ترتيب الجامعات ( اعلى ل الأقل)</h3>
             <div class="chart-container" style="height: 350px;">
                 <canvas id="universitiesChart"></canvas>
             </div>
         </div>
 
-        <div class="chart-card">
+        <div class="chart-card wide">
             <h3>ايام المشاركه و الإتاحه</h3>
             <div class="chart-container">
                 <canvas id="daysChart"></canvas>
             </div>
         </div>
 
-        <div class="chart-card" style="grid-column: span 2;">
+        <div class="chart-card wide">
             <h3>المهام التي يرغب المتطوعون بالمشاركة بها</h3>
             <div class="chart-container" style="height: 400px;">
                 <canvas id="tasksChart"></canvas>
             </div>
         </div>
 
-        <div class="chart-card" style="grid-column: span 2;">
+        <div class="chart-card wide">
             <h3>تحليل استبيانات مدى رضا المتطوعين عن بنود يوم الاستقبال</h3>
             <div class="chart-container" style="height: 340px;">
                 <canvas id="satisfactionChart"></canvas>
@@ -438,49 +523,69 @@
         </div>
     </div>
 
-    <!-- قسم جدول المتطوعين مع خانة البحث بخط موازي للعنوان -->
+    <!-- قائمة المتطوعين: محمية بالرقم السري (التحقق يتم في السيرفر) -->
     <div class="table-section">
         <div class="table-header">
             <h3>قائمة المتطوعين</h3>
-            <div class="search-box">
-                <input type="text" id="searchNameInput" placeholder="🔍 بحث باسم المتطوع..." onkeyup="filterData()">
+            <div class="search-box hidden" id="searchBox">
+                <input type="text" id="searchNameInput" placeholder="🔍 بحث باسم المتطوع..." oninput="renderVolunteersTable()">
+                <button class="btn-reset" onclick="lockVolunteers()">🔒 قفل القائمة</button>
             </div>
         </div>
-        <div class="table-scroll-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>كود المتطوع</th>
-                        <th>اسم المتطوع</th>
-                        <th>تاريخ الإستقبال</th>
-                        <th>المحافظة</th>
-                        <th>المركز</th>
-                        <th>الجامعة</th>
-                        <th>اللجنة المرغوبة</th>
-                    </tr>
-                </thead>
-                <tbody id="volunteersTableBody">
-                    <tr>
-                        <td colspan="7" style="text-align: center; color: var(--text-muted);">جاري تحميل البيانات...</td>
-                    </tr>
-                </tbody>
-            </table>
+
+        <div id="lockedPanel" class="locked-panel">
+            <div class="lock-icon">🔒</div>
+            <p>قائمة المتطوعين تحتوي على بيانات خاصة. أدخل الرقم السري لعرضها.</p>
+            <div class="pin-row">
+                <input type="password" id="pinInput" inputmode="numeric" autocomplete="off"
+                       placeholder="الرقم السري" onkeydown="if(event.key==='Enter') unlockVolunteers()">
+                <button class="btn-apply" id="unlockBtn" onclick="unlockVolunteers()">فتح القائمة</button>
+            </div>
+            <div class="pin-error" id="pinError" role="alert"></div>
+        </div>
+
+        <div id="tableWrap" class="hidden">
+            <div class="table-scroll-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>كود المتطوع</th>
+                            <th>اسم المتطوع</th>
+                            <th>تاريخ الإستقبال</th>
+                            <th>المحافظة</th>
+                            <th>المركز</th>
+                            <th>الجامعة</th>
+                            <th>اللجنة المرغوبة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="volunteersTableBody"></tbody>
+                </table>
+            </div>
+            <div class="table-count" id="tableCount"></div>
         </div>
     </div>
 
-    <footer class="dashboard-footer-small">
+    <footer class="dashboard-footer">
         أسر صناع الحياة بالجامعات المصرية_2026
     </footer>
 
     <script>
         Chart.register(ChartDataLabels);
 
-        let rawServerData = null; 
+        let rawServerData = null;      // البيانات العامة (بدون أسماء)
+        let volunteersData = null;     // البيانات الخاصة (في الذاكرة فقط، بعد إدخال الـ PIN)
         let activeTheme = 'light';
+        let autoLockTimer = null;
+        const AUTO_LOCK_MS = 10 * 60 * 1000; // قفل تلقائي بعد 10 دقائق
         const charts = {};
 
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3DG9t0b6FBebvtIhd19KN9VfVeUb_gKWVDhkSAqS4QcAwUW5kafWNyn315atcUyWFxg/exec";
 
+        const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+
+        /* ---------------- الثيم ---------------- */
         function toggleTheme() {
             const body = document.body;
             const icon = document.getElementById("themeIcon");
@@ -496,13 +601,14 @@
             filterData();
         }
 
+        /* ---------------- تحميل البيانات العامة ---------------- */
         async function fetchDashboardData() {
             try {
                 const response = await fetch(SCRIPT_URL);
                 const data = await response.json();
                 if (data.error) return;
 
-                rawServerData = data; 
+                rawServerData = data;
                 populateFilters(data);
                 filterData();
             } catch (error) {
@@ -514,7 +620,11 @@
             const fillSelect = (id, obj) => {
                 const sel = document.getElementById(id);
                 sel.innerHTML = `<option value="">الكل</option>`;
-                if(obj) { Object.keys(obj).sort().forEach(k => { sel.innerHTML += `<option value="${k}">${k}</option>`; }); }
+                if (obj) {
+                    Object.keys(obj).sort().forEach(k => {
+                        sel.innerHTML += `<option value="${esc(k)}">${esc(k)}</option>`;
+                    });
+                }
             };
             fillSelect("filterGov", data.governorates);
             fillSelect("filterCenter", data.centers);
@@ -523,28 +633,42 @@
         }
 
         function resetFilters() {
-            document.getElementById("filterStartDate").value = "";
-            document.getElementById("filterEndDate").value = "";
-            document.getElementById("filterGov").value = "";
-            document.getElementById("filterCenter").value = "";
-            document.getElementById("filterUni").value = "";
-            document.getElementById("filterCommittee").value = "";
-            document.getElementById("searchNameInput").value = "";
+            ["filterStartDate", "filterEndDate", "filterGov", "filterCenter",
+             "filterUni", "filterCommittee", "searchNameInput"].forEach(id => {
+                document.getElementById(id).value = "";
+            });
             filterData();
+        }
+
+        /* ---------------- الفلترة ---------------- */
+        function getFilters() {
+            return {
+                start: document.getElementById("filterStartDate").value,
+                end: document.getElementById("filterEndDate").value,
+                gov: document.getElementById("filterGov").value,
+                center: document.getElementById("filterCenter").value,
+                uni: document.getElementById("filterUni").value,
+                committee: document.getElementById("filterCommittee").value
+            };
+        }
+
+        function matchesFilters(row, f) {
+            const uniVal = row.uni || row.university;
+            if (f.start && row.date && row.date < f.start) return false;
+            if (f.end && row.date && row.date > f.end) return false;
+            if (f.gov && row.gov !== f.gov) return false;
+            if (f.center && row.center !== f.center) return false;
+            if (f.uni && uniVal !== f.uni) return false;
+            if (f.committee && row.committee !== f.committee) return false;
+            return true;
         }
 
         function filterData() {
             if (!rawServerData) return;
 
-            const startDate = document.getElementById("filterStartDate").value;
-            const endDate = document.getElementById("filterEndDate").value;
-            const selectedGov = document.getElementById("filterGov").value;
-            const selectedCenter = document.getElementById("filterCenter").value;
-            const selectedUni = document.getElementById("filterUni").value;
-            const selectedCommittee = document.getElementById("filterCommittee").value;
-            const nameSearchQuery = document.getElementById("searchNameInput").value.trim().toLowerCase();
+            const f = getFilters();
 
-            let filteredStats = {
+            const filteredStats = {
                 totalRecords: 0, onlineRecords: 0, offlineRecords: 0,
                 volunteerType: {"Offline": 0, "Online": 0},
                 committees: {},
@@ -560,247 +684,252 @@
                 }
             };
 
-            const tableBody = document.getElementById("volunteersTableBody");
-            tableBody.innerHTML = "";
+            (rawServerData.allRowsRaw || []).forEach(row => {
+                if (!matchesFilters(row, f)) return;
+                const uniVal = row.uni || row.university;
 
-            if(rawServerData.allRowsRaw) {
-                rawServerData.allRowsRaw.forEach(row => {
-                    const uniVal = row.uni || row.university;
-                    const volunteerName = (row.name || '').toLowerCase();
+                filteredStats.totalRecords++;
 
-                    // التصفية بحسب الاسم المكتوب في حقل البحث
-                    if (nameSearchQuery && !volunteerName.includes(nameSearchQuery)) return;
+                if (row.isOffline) { filteredStats.offlineRecords++; filteredStats.volunteerType["Offline"]++; }
+                if (row.isOnline) { filteredStats.onlineRecords++; filteredStats.volunteerType["Online"]++; }
 
-                    if (startDate && row.date && row.date < startDate) return;
-                    if (endDate && row.date && row.date > endDate) return;
+                if (row.committee) filteredStats.committees[row.committee] = (filteredStats.committees[row.committee] || 0) + 1;
+                if (uniVal) filteredStats.universities[uniVal] = (filteredStats.universities[uniVal] || 0) + 1;
 
-                    if (selectedGov && row.gov !== selectedGov) return;
-                    if (selectedCenter && row.center !== selectedCenter) return;
-                    if (selectedUni && uniVal !== selectedUni) return;
-                    if (selectedCommittee && row.committee !== selectedCommittee) return;
+                if (row.daysList) {
+                    row.daysList.forEach(d => {
+                        if (filteredStats.availableDays[d] !== undefined) filteredStats.availableDays[d]++;
+                    });
+                }
 
-                    filteredStats.totalRecords++;
+                if (row.tasksList) {
+                    row.tasksList.forEach(t => { if (t) filteredStats.desiredTasks[t] = (filteredStats.desiredTasks[t] || 0) + 1; });
+                }
 
-                    if(row.isOffline) { filteredStats.offlineRecords++; filteredStats.volunteerType["Offline"]++; }
-                    if(row.isOnline) { filteredStats.onlineRecords++; filteredStats.volunteerType["Online"]++; }
-
-                    if(row.committee) { filteredStats.committees[row.committee] = (filteredStats.committees[row.committee] || 0) + 1; }
-                    
-                    if(uniVal) { 
-                        filteredStats.universities[uniVal] = (filteredStats.universities[uniVal] || 0) + 1; 
-                    }
-
-                    if(row.daysList) {
-                        row.daysList.forEach(d => { 
-                            if(filteredStats.availableDays[d] !== undefined) {
-                                filteredStats.availableDays[d]++; 
-                            }
-                        });
-                    }
-
-                    if(row.tasksList) {
-                        row.tasksList.forEach(t => { if(t) filteredStats.desiredTasks[t] = (filteredStats.desiredTasks[t] || 0) + 1; });
-                    }
-
-                    const addSat = (val, subObj) => { if(val && subObj[val] !== undefined) subObj[val]++; };
-                    addSat(row.satTime, filteredStats.satisfaction.communicationTime);
-                    addSat(row.satAccess, filteredStats.satisfaction.accessEase);
-                    addSat(row.satPlace, filteredStats.satisfaction.placeSuitability);
-                    addSat(row.satContent, filteredStats.satisfaction.contentClarity);
-                    addSat(row.satPresenter, filteredStats.satisfaction.presenterPerformance);
-
-                    tableBody.innerHTML += `
-                        <tr>
-                            <td>${row.code || ''}</td>
-                            <td><strong>${row.name || ''}</strong></td>
-                            <td>${row.date || 'غير مسجل'}</td>
-                            <td>${row.gov || ''}</td>
-                            <td>${row.center || ''}</td>
-                            <td>${uniVal || ''}</td>
-                            <td>${row.committee || ''}</td>
-                        </tr>
-                    `;
-                });
-            }
-
-            if(filteredStats.totalRecords === 0) {
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا توجد بيانات مطابقة للبحث الحالي.</td></tr>`;
-            }
+                const addSat = (val, subObj) => { if (val && subObj[val] !== undefined) subObj[val]++; };
+                addSat(row.satTime, filteredStats.satisfaction.communicationTime);
+                addSat(row.satAccess, filteredStats.satisfaction.accessEase);
+                addSat(row.satPlace, filteredStats.satisfaction.placeSuitability);
+                addSat(row.satContent, filteredStats.satisfaction.contentClarity);
+                addSat(row.satPresenter, filteredStats.satisfaction.presenterPerformance);
+            });
 
             document.getElementById("kpiTotal").innerText = filteredStats.totalRecords;
             document.getElementById("kpiField").innerText = filteredStats.offlineRecords;
             document.getElementById("kpiRemote").innerText = filteredStats.onlineRecords;
 
             renderCharts(filteredStats);
+            renderVolunteersTable();
         }
 
+        /* ---------------- قائمة المتطوعين المحمية ---------------- */
+        const PIN_ERRORS = {
+            invalid_pin: 'الرقم السري غير صحيح',
+            locked: 'محاولات خاطئة كتيرة. حاول مرة تانية بعد 10 دقائق',
+            pin_not_set: 'لم يتم ضبط الرقم السري في السكريبت بعد'
+        };
+
+        async function unlockVolunteers() {
+            const pinEl = document.getElementById("pinInput");
+            const errEl = document.getElementById("pinError");
+            const btn = document.getElementById("unlockBtn");
+            const pin = pinEl.value.trim();
+
+            errEl.textContent = "";
+            if (!pin) { errEl.textContent = "أدخل الرقم السري أولاً"; return; }
+
+            btn.disabled = true;
+            btn.textContent = "جاري التحقق...";
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=volunteers&pin=${encodeURIComponent(pin)}`);
+                const data = await res.json();
+
+                if (data.error) {
+                    errEl.textContent = PIN_ERRORS[data.error] || 'تعذر فتح القائمة';
+                    return;
+                }
+
+                volunteersData = data.rows || [];   // في الذاكرة فقط، بدون localStorage
+                pinEl.value = "";
+                document.getElementById("lockedPanel").classList.add("hidden");
+                document.getElementById("tableWrap").classList.remove("hidden");
+                document.getElementById("searchBox").classList.remove("hidden");
+                renderVolunteersTable();
+            } catch (e) {
+                console.error(e);
+                errEl.textContent = "حدث خطأ في الاتصال. حاول مرة أخرى";
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "فتح القائمة";
+            }
+        }
+
+        function lockVolunteers() {
+            volunteersData = null;
+            clearTimeout(autoLockTimer);
+            document.getElementById("volunteersTableBody").innerHTML = "";
+            document.getElementById("searchNameInput").value = "";
+            document.getElementById("tableWrap").classList.add("hidden");
+            document.getElementById("searchBox").classList.add("hidden");
+            document.getElementById("lockedPanel").classList.remove("hidden");
+            document.getElementById("pinError").textContent = "";
+        }
+
+        function renderVolunteersTable() {
+            if (!volunteersData) return;
+
+            clearTimeout(autoLockTimer);
+            autoLockTimer = setTimeout(lockVolunteers, AUTO_LOCK_MS);
+
+            const f = getFilters();
+            const q = document.getElementById("searchNameInput").value.trim().toLowerCase();
+
+            const rows = volunteersData.filter(r =>
+                matchesFilters(r, f) && (!q || (r.name || '').toLowerCase().includes(q))
+            );
+
+            const body = document.getElementById("volunteersTableBody");
+            if (rows.length === 0) {
+                body.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">لا توجد بيانات مطابقة للبحث الحالي.</td></tr>`;
+            } else {
+                body.innerHTML = rows.map(r => `
+                    <tr>
+                        <td>${esc(r.code)}</td>
+                        <td><strong>${esc(r.name)}</strong></td>
+                        <td>${esc(r.date) || 'غير مسجل'}</td>
+                        <td>${esc(r.gov)}</td>
+                        <td>${esc(r.center)}</td>
+                        <td>${esc(r.uni)}</td>
+                        <td>${esc(r.committee)}</td>
+                    </tr>`).join("");
+            }
+            document.getElementById("tableCount").textContent = `عدد المتطوعين المعروضين: ${rows.length}`;
+        }
+
+        /* ---------------- الرسوم البيانية ---------------- */
         function renderCharts(data) {
             const isDark = activeTheme === 'dark';
-            const textLableColor = isDark ? '#94a3b8' : '#475569';
-            const gridBorderColor = isDark ? '#334155' : '#e2e8f0';
+            const textLabelColor = isDark ? '#9fb6c7' : '#3f5b70';
+            const gridBorderColor = isDark ? '#23415a' : '#dbe6ee';
 
-            const colorsType = ['#4fc3f7', '#4db6ac'];
-            const colorsCommittees = ['#ff8a65', '#ba68c8', '#64b5f6', '#81c784', '#ffd54f', '#90a4ae'];
-            const bluePalette = ['#0284c7', '#38bdf8', '#4bc0c0', '#ffcf9f', '#b3a2e7'];
+            // ألوان الهوية (كحلي + برتقالي وتدرجاتهم)
+            const P = isDark
+                ? { navy: '#5ab0e8', orange: '#ff9436', sky: '#2d7fbf', amber: '#ffc98b', slate: '#a9bccb', deep: '#e8f1f8' }
+                : { navy: '#054b7a', orange: '#ef7109', sky: '#4fa3d9', amber: '#f7b267', slate: '#7c8fa3', deep: '#0b2a40' };
 
-            const baseOptions = {
+            const colorsType = [P.navy, P.orange];
+            const colorsCommittees = [P.navy, P.orange, P.sky, P.amber, P.slate, P.deep];
+
+            const labelsPlugin = (horizontal) => ({
+                legend: { display: false },
+                datalabels: {
+                    anchor: 'end',
+                    align: horizontal ? 'right' : 'top',
+                    color: textLabelColor,
+                    font: { weight: 'bold', size: 11 },
+                    formatter: (value) => value > 0 ? value : ''
+                }
+            });
+
+            const verticalOptions = () => ({
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { 
-                    legend: { display: false },
-                    datalabels: {
-                        anchor: 'end',
-                        align: 'top',
-                        color: textLableColor,
-                        font: { weight: 'bold', size: 11 },
-                        formatter: function(value) { return value > 0 ? value : ''; }
-                    }
-                },
+                plugins: labelsPlugin(false),
                 scales: {
-                    x: { grid: { color: gridBorderColor }, ticks: { color: textLableColor, font: { family: 'Segoe UI', size: 11 } } },
-                    y: { 
-                        grid: { color: gridBorderColor }, 
-                        ticks: { color: textLableColor, stepSize: 1, precision: 0 }, 
-                        beginAtZero: true,
-                        grace: '15%'
-                    }
+                    x: { grid: { color: gridBorderColor }, ticks: { color: textLabelColor, font: { family: 'Segoe UI', size: 11 } } },
+                    y: { grid: { color: gridBorderColor }, ticks: { color: textLabelColor, precision: 0 }, beginAtZero: true, grace: '15%' }
                 }
-            };
+            });
+
+            const horizontalOptions = () => ({
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: labelsPlugin(true),
+                scales: {
+                    x: { grid: { color: gridBorderColor }, ticks: { color: textLabelColor, precision: 0 }, beginAtZero: true, grace: '10%' },
+                    y: { grid: { display: false }, ticks: { color: textLabelColor, font: { family: 'Segoe UI', size: 12 } } }
+                }
+            });
 
             // 1. نوع التطوع
-            if(charts.type) charts.type.destroy();
+            if (charts.type) charts.type.destroy();
             charts.type = new Chart(document.getElementById("typeChart"), {
                 type: 'bar',
                 data: {
                     labels: Object.keys(data.volunteerType || {}),
-                    datasets: [{ data: Object.values(data.volunteerType || {}), backgroundColor: colorsType }]
+                    datasets: [{ data: Object.values(data.volunteerType || {}), backgroundColor: colorsType, borderRadius: 4 }]
                 },
-                options: baseOptions
+                options: verticalOptions()
             });
 
             // 2. اللجان
-            if(charts.committee) charts.committee.destroy();
+            if (charts.committee) charts.committee.destroy();
             charts.committee = new Chart(document.getElementById("committeeChart"), {
                 type: 'bar',
                 data: {
                     labels: Object.keys(data.committees || {}),
-                    datasets: [{ data: Object.values(data.committees || {}), backgroundColor: colorsCommittees }]
+                    datasets: [{ data: Object.values(data.committees || {}), backgroundColor: colorsCommittees, borderRadius: 4 }]
                 },
-                options: baseOptions
+                options: verticalOptions()
             });
 
             // 3. الجامعات
-            if(charts.universities) charts.universities.destroy();
-            let uniSource = (data.universities && Object.keys(data.universities).length > 0) 
-                ? data.universities 
-                : (rawServerData && rawServerData.universities ? rawServerData.universities : {});
-
-            const sortedUnis = Object.entries(uniSource).sort((a, b) => b[1] - a[1]);
-
+            if (charts.universities) charts.universities.destroy();
+            const sortedUnis = Object.entries(data.universities || {}).sort((a, b) => b[1] - a[1]);
             charts.universities = new Chart(document.getElementById("universitiesChart"), {
                 type: 'bar',
                 data: {
-                    labels: sortedUnis.map(item => item[0]),
-                    datasets: [{
-                        label: 'عدد المتطوعين',
-                        data: sortedUnis.map(item => item[1]),
-                        backgroundColor: '#0284c7',
-                        borderRadius: 4
-                    }]
+                    labels: sortedUnis.map(i => i[0]),
+                    datasets: [{ label: 'عدد المتطوعين', data: sortedUnis.map(i => i[1]), backgroundColor: P.navy, borderRadius: 4 }]
                 },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'right',
-                            color: textLableColor,
-                            font: { weight: 'bold', size: 11 },
-                            formatter: function(value) { return value > 0 ? value : ''; }
-                        }
-                    },
-                    scales: {
-                        x: { grid: { color: gridBorderColor }, ticks: { color: textLableColor, precision: 0 }, beginAtZero: true, grace: '10%' },
-                        y: { grid: { display: false }, ticks: { color: textLableColor, font: { family: 'Segoe UI', size: 12 } } }
-                    }
-                }
+                options: horizontalOptions()
             });
 
             // 4. الأيام
-            if(charts.days) charts.days.destroy();
+            if (charts.days) charts.days.destroy();
             const daysLabels = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
-            const daysValues = daysLabels.map(day => data.availableDays[day] || 0);
-
+            const daysValues = daysLabels.map(day => (data.availableDays || {})[day] || 0);
             charts.days = new Chart(document.getElementById("daysChart"), {
                 type: 'bar',
                 data: {
                     labels: daysLabels,
-                    datasets: [{ data: daysValues, backgroundColor: '#42a5f5' }]
+                    datasets: [{ data: daysValues, backgroundColor: P.sky, borderRadius: 4 }]
                 },
-                options: baseOptions
+                options: verticalOptions()
             });
 
             // 5. المهام
-            if(charts.tasks) charts.tasks.destroy();
-            let taskSource = (data.desiredTasks && Object.keys(data.desiredTasks).length > 0) 
-                ? data.desiredTasks 
-                : (rawServerData && rawServerData.desiredTasks ? rawServerData.desiredTasks : {});
-
-            const sortedTasks = Object.entries(taskSource).sort((a, b) => b[1] - a[1]);
-
+            if (charts.tasks) charts.tasks.destroy();
+            const sortedTasks = Object.entries(data.desiredTasks || {}).sort((a, b) => b[1] - a[1]);
             charts.tasks = new Chart(document.getElementById("tasksChart"), {
                 type: 'bar',
                 data: {
-                    labels: sortedTasks.map(item => item[0]),
-                    datasets: [{
-                        label: 'عدد الراغبين',
-                        data: sortedTasks.map(item => item[1]),
-                        backgroundColor: '#0369a1',
-                        borderRadius: 4
-                    }]
+                    labels: sortedTasks.map(i => i[0]),
+                    datasets: [{ label: 'عدد الراغبين', data: sortedTasks.map(i => i[1]), backgroundColor: P.orange, borderRadius: 4 }]
                 },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'right',
-                            color: textLableColor,
-                            font: { weight: 'bold', size: 11 },
-                            formatter: function(value) { return value > 0 ? value : ''; }
-                        }
-                    },
-                    scales: {
-                        x: { grid: { color: gridBorderColor }, ticks: { color: textLableColor, precision: 0 }, beginAtZero: true, grace: '10%' },
-                        y: { grid: { display: false }, ticks: { color: textLableColor, font: { family: 'Segoe UI', size: 12 } } }
-                    }
-                }
+                options: horizontalOptions()
             });
 
             // 6. الرضا
-            if(charts.satisfaction) charts.satisfaction.destroy();
+            if (charts.satisfaction) charts.satisfaction.destroy();
             const ratingLabels = ["ممتاز", "جيد جداً", "جيد", "مقبول", "سيء"];
             const getRatingArray = (subObj) => ratingLabels.map(l => subObj ? (subObj[l] || 0) : 0);
 
-            let satOptions = JSON.parse(JSON.stringify(baseOptions));
-            satOptions.plugins.legend = { display: true, labels: { color: textLableColor } };
+            const satOptions = verticalOptions();
+            satOptions.plugins.legend = { display: true, labels: { color: textLabelColor } };
 
+            const sat = data.satisfaction || {};
             charts.satisfaction = new Chart(document.getElementById("satisfactionChart"), {
                 type: 'bar',
                 data: {
                     labels: ratingLabels,
                     datasets: [
-                        { label: 'مدة التواصل', data: getRatingArray(data.satisfaction?.communicationTime), backgroundColor: bluePalette[0] },
-                        { label: 'سهولة الوصول', data: getRatingArray(data.satisfaction?.accessEase), backgroundColor: bluePalette[1] },
-                        { label: 'تناسب المكان', data: getRatingArray(data.satisfaction?.placeSuitability), backgroundColor: bluePalette[2] },
-                        { label: 'وضوح المحتوى', data: getRatingArray(data.satisfaction?.contentClarity), backgroundColor: bluePalette[3] },
-                        { label: 'أداء مقدم الاستقبال', data: getRatingArray(data.satisfaction?.presenterPerformance), backgroundColor: bluePalette[4] }
+                        { label: 'مدة التواصل', data: getRatingArray(sat.communicationTime), backgroundColor: P.navy, borderRadius: 3 },
+                        { label: 'سهولة الوصول', data: getRatingArray(sat.accessEase), backgroundColor: P.orange, borderRadius: 3 },
+                        { label: 'تناسب المكان', data: getRatingArray(sat.placeSuitability), backgroundColor: P.sky, borderRadius: 3 },
+                        { label: 'وضوح المحتوى', data: getRatingArray(sat.contentClarity), backgroundColor: P.amber, borderRadius: 3 },
+                        { label: 'أداء مقدم الاستقبال', data: getRatingArray(sat.presenterPerformance), backgroundColor: P.slate, borderRadius: 3 }
                     ]
                 },
                 options: satOptions
