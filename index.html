@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>استقبال نوادي صناع الحياه</title>
+    <title>إستقبال نوادي صناع الحياة</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" href="logo%20نوادي%20صناع%20الحياة.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
@@ -40,8 +43,10 @@
 
         * { box-sizing: border-box; }
 
+        button, input, select { font-family: inherit; }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
@@ -95,8 +100,10 @@
 
         .header-title h1 {
             margin: 0;
-            font-size: 26px;
-            font-weight: bold;
+            font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+            font-size: 30px;
+            font-weight: 800;
+            line-height: 1.3;
             color: #ffffff;
         }
 
@@ -415,7 +422,7 @@
             <div class="logo-badge">
                 <img src="logo%20نوادي%20صناع%20الحياة.png" alt="شعار نوادي صناع الحياة" class="header-logo">
             </div>
-            <h1>استقبال نوادي صناع الحياه</h1>
+            <h1>إستقبال نوادي صناع الحياة</h1>
         </div>
         <button id="themeToggle" onclick="toggleTheme()" class="theme-btn-sm" title="تبديل الوضع">
             <span id="themeIcon">🌙</span>
@@ -566,11 +573,12 @@
     </div>
 
     <footer class="dashboard-footer">
-        أسر صناع الحياة بالجامعات المصرية_2026
+        نوادي صناع الحياة _ 2026
     </footer>
 
     <script>
         Chart.register(ChartDataLabels);
+        Chart.defaults.font.family = "'Cairo', 'Segoe UI', Tahoma, sans-serif";
 
         let rawServerData = null;      // البيانات العامة (بدون أسماء)
         let volunteersData = null;     // البيانات الخاصة (في الذاكرة فقط، بعد إدخال الـ PIN)
@@ -836,7 +844,7 @@
                 maintainAspectRatio: false,
                 plugins: labelsPlugin(false),
                 scales: {
-                    x: { grid: { color: gridBorderColor }, ticks: { color: textLabelColor, font: { family: 'Segoe UI', size: 11 } } },
+                    x: { grid: { color: gridBorderColor }, ticks: { color: textLabelColor, font: { family: 'Cairo', size: 11 } } },
                     y: { grid: { color: gridBorderColor }, ticks: { color: textLabelColor, precision: 0 }, beginAtZero: true, grace: '15%' }
                 }
             });
@@ -847,8 +855,8 @@
                 maintainAspectRatio: false,
                 plugins: labelsPlugin(true),
                 scales: {
-                    x: { grid: { color: gridBorderColor }, ticks: { color: textLabelColor, precision: 0 }, beginAtZero: true, grace: '10%' },
-                    y: { grid: { display: false }, ticks: { color: textLabelColor, font: { family: 'Segoe UI', size: 12 } } }
+                    x: { grid: { color: gridBorderColor }, ticks: { color: textLabelColor, precision: 0 }, beginAtZero: true, grace: '15%' },
+                    y: { grid: { display: false }, ticks: { color: textLabelColor, font: { family: 'Cairo', size: 12 } } }
                 }
             });
 
@@ -936,7 +944,10 @@
             });
         }
 
-        window.onload = fetchDashboardData;
+        window.onload = async () => {
+            try { await document.fonts.load('700 16px Cairo'); } catch (e) {}
+            fetchDashboardData();
+        };
     </script>
 </body>
 </html>
