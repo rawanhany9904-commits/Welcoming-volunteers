@@ -627,6 +627,68 @@
             .dashboard-footer { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
         }
 
+        /* ---------- شاشة التحميل الأولى ---------- */
+        #splashScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: linear-gradient(135deg, #054b7a, #0a68a3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            transition: opacity .45s ease, visibility .45s ease;
+        }
+        #splashScreen.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+
+        .splash-logo-badge {
+            width: 180px;
+            height: 104px;
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgb(0 0 0 / 0.25);
+            animation: splashPulse 1.6s ease-in-out infinite;
+        }
+        .splash-logo-badge img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        @keyframes splashPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+
+        .splash-text {
+            color: #fff;
+            font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: .9;
+        }
+
+        .splash-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,.35);
+            border-top-color: var(--orange);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+
+        #mainContent { opacity: 0; transition: opacity .4s ease; }
+        #mainContent.ready { opacity: 1; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .splash-logo-badge { animation: none; }
+        }
+
+        @media (max-width: 700px) {
+            .splash-logo-badge { width: 140px; height: 82px; border-radius: 14px; }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             * { transition: none !important; animation: none !important; }
         }
@@ -634,7 +696,14 @@
 </head>
 <body>
 
-    <div class="header-container">
+    <div id="splashScreen">
+        <div class="splash-logo-badge">
+            <img src="logo%20نوادي%20صناع%20الحياة.png" alt="شعار نوادي صناع الحياة">
+        </div>
+        <div class="splash-text"><span class="splash-spinner"></span>جاري تحميل الداش بورد...</div>
+    </div>
+
+    <div id="mainContent">
         <div class="header-title">
             <div class="logo-badge">
                 <img src="logo%20نوادي%20صناع%20الحياة.png" alt="شعار نوادي صناع الحياة" class="header-logo">
@@ -854,6 +923,7 @@
     <footer class="dashboard-footer">
         نوادي صناع الحياة _ 2026
     </footer>
+    </div><!-- /#mainContent -->
 
     <script>
         Chart.register(ChartDataLabels);
@@ -862,6 +932,7 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3DG9t0b6FBebvtIhd19KN9VfVeUb_gKWVDhkSAqS4QcAwUW5kafWNyn315atcUyWFxg/exec";
 
         const AUTO_LOCK_MS = 10 * 60 * 1000;   // قفل القائمة تلقائيًا بعد 10 دقائق
+        const AUTO_REFRESH_MS = 3 * 60 * 1000; // تحديث تلقائي للأرقام والرسوم كل 3 دقائق
         const TASKS_TOP_N = 10;
         const RATINGS = ["ممتاز", "جيد جداً", "جيد", "مقبول", "سيء"];
         const SCORE = { "ممتاز": 5, "جيد جداً": 4, "جيد": 3, "مقبول": 2, "سيء": 1 };
@@ -964,7 +1035,19 @@
             } catch (error) {
                 console.error(error);
                 setStatus('error');
+            } finally {
+                revealDashboard();
             }
+        }
+
+        // تظهر الداش بورد وتخفي شاشة اللوجو، أول مرة بس
+        let revealed = false;
+        function revealDashboard() {
+            if (revealed) return;
+            revealed = true;
+            document.getElementById("mainContent").classList.add("ready");
+            document.getElementById("splashScreen").classList.add("hide");
+            setTimeout(() => document.getElementById("splashScreen").remove(), 500);
         }
 
         async function refreshAll() {
@@ -1540,7 +1623,11 @@
             else if (mq.addListener) mq.addListener(onBreakpoint);
 
             try { await document.fonts.load('700 16px Cairo'); } catch (e) {}
-            fetchDashboardData();
+            await fetchDashboardData();
+
+            // تحديث تلقائي كل بضع دقائق، يتوقف لو التبويب مش مفتوح لتوفير البيانات
+            setInterval(() => { if (!document.hidden) refreshAll(); }, AUTO_REFRESH_MS);
+            document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshAll(); });
         };
     </script>
 </body>
