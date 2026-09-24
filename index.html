@@ -493,6 +493,8 @@
             width: 200px;
             text-align: center;
             letter-spacing: 4px;
+            -webkit-text-security: disc;
+            text-security: disc;
         }
 
         .pin-error { margin-top: 12px; min-height: 20px; color: #d93025; font-weight: 700; font-size: 14px; }
@@ -895,7 +897,9 @@
             <div class="lock-icon">🔒</div>
             <p>قائمة المتطوعين تحتوي على بيانات خاصة. أدخل الرقم السري لعرضها.</p>
             <div class="pin-row">
-                <input type="password" id="pinInput" inputmode="numeric" autocomplete="off"
+                <input type="text" id="pinInput" name="reception-code" inputmode="numeric" pattern="[0-9]*"
+                       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                       data-lpignore="true" data-1p-ignore data-form-type="other"
                        placeholder="الرقم السري" aria-label="الرقم السري"
                        onkeydown="if(event.key==='Enter') unlockVolunteers()">
                 <button class="btn-apply" id="unlockBtn" onclick="unlockVolunteers()">فتح القائمة</button>
